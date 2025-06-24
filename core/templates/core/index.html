@@ -1,0 +1,985 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>SightTrack</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
+
+    <!-- Lenis Smooth Scrolling - Multiple CDN fallbacks -->
+    <script>
+        // Try multiple CDN sources for Lenis
+        const lenisCDNs = [
+            'https://unpkg.com/lenis@1.0.45/dist/lenis.min.js',
+            'https://cdn.jsdelivr.net/npm/lenis@1.0.45/dist/lenis.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/lenis/1.0.29/lenis.min.js'
+        ];
+
+        let lenisLoaded = false;
+        let currentCDNIndex = 0;
+
+        function loadLenisFromCDN(index = 0) {
+            if (index >= lenisCDNs.length) {
+                console.log('All Lenis CDNs failed, will use native scroll');
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = lenisCDNs[index];
+            script.onload = function () {
+                lenisLoaded = true;
+                console.log(`Lenis loaded successfully from: ${lenisCDNs[index]}`);
+            };
+            script.onerror = function () {
+                console.log(`Failed to load Lenis from: ${lenisCDNs[index]}`);
+                loadLenisFromCDN(index + 1);
+            };
+            document.head.appendChild(script);
+        }
+
+        // Start loading Lenis immediately
+        loadLenisFromCDN();
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow-x: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: white;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        #content {
+            position: relative;
+            z-index: 2;
+            height: 320vh;
+            pointer-events: none;
+        }
+
+        .section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5%;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        .section.short {
+            height: 30vh;
+            padding-top: 0;
+        }
+
+        .section.close-to-previous {
+            height: 40vh;
+            margin-top: -40vh;
+            padding-top: 0;
+        }
+
+        .title-section {
+            background: transparent;
+            height: 10vh;
+        }
+
+        .first-section {
+            /* height: 10vh; */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5%;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        .text-content {
+            max-width: 800px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: auto;
+
+            /* Container styling */
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+            /* Subtle interactive effects */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .text-content:hover::before {
+            opacity: 1;
+        }
+
+        .text-content:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .text-content.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-content.visible:hover {
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin: 0 0 2rem 0;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            margin: 0 0 1.5rem 0;
+            color: #ffffff;
+        }
+
+        p {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            line-height: 1.6;
+            color: #cccccc;
+            margin: 0 0 1.5rem 0;
+            font-weight: 300;
+        }
+
+        .highlight {
+            color: #ffffff;
+            font-weight: 400;
+        }
+
+        .subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            color: #999999;
+            font-weight: 300;
+            letter-spacing: 0.01em;
+        }
+
+        a {
+            color: #08f;
+        }
+
+        #info {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            backdrop-filter: blur(5px);
+        }
+
+        #birdCount {
+            background-color: #222;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 4px 8px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        label {
+            color: #ccc;
+        }
+
+        .button-container {
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: auto;
+
+            /* Container styling matching text-content */
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .button-container:hover::before {
+            opacity: 1;
+        }
+
+        .button-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .action-button {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+
+            /* Individual button animation */
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            left: 100%;
+        }
+
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .button-container.visible .action-button {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Staggered animation delays */
+        .action-button[data-delay="0"] {
+            transition-delay: 0.1s;
+        }
+
+        .action-button[data-delay="1"] {
+            transition-delay: 0.2s;
+        }
+
+        .action-button[data-delay="2"] {
+            transition-delay: 0.3s;
+        }
+
+        .action-button[data-delay="3"] {
+            transition-delay: 0.4s;
+        }
+
+        .action-button[data-delay="4"] {
+            transition-delay: 0.5s;
+        }
+
+        /* Loop content styling */
+        .loop-content .text-content {
+            opacity: 0.7;
+            /* Slightly dimmed to indicate it's the loop */
+            transition: opacity 0.3s ease;
+        }
+
+        .loop-content .text-content:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="content">
+        <section class="section title-section">
+            <!-- Initial space for birds to fly -->
+        </section>
+
+        <section class="first-section">
+            <div class="button-container" data-scroll>
+                <a href="{% url 'get_started' %}">
+                    <button class="action-button" data-delay="0">Get Started</button>
+                </a>
+                <a href="{% url 'learn_more' %}">
+                    <button class="action-button" data-delay="1">Learn More</button>
+                </a>
+                <a href="{% url 'about_us' %}">
+                    <button class="action-button" data-delay="2">About Us</button>
+                </a>
+                <a href="{% url 'legal' %}">
+                    <button class="action-button" data-delay="3">Legal</button>
+                </a>
+                <a href="{% url 'contact' %}">
+                    <button class="action-button" data-delay="4">Contact</button>
+                </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="text-content" data-scroll>
+                <h2>SightTrack</h2>
+                <p class="subtitle">An environmental conservation project that tracks wildlife through citizen
+                    science
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="text-content" data-scroll>
+                <h2>Sightings</h2>
+                <p>Similar to <span class="highlight">iNaturalist</span>, we allow users to take photos of animals and
+                    plants. But we also offer various modes of data collection, allowing audiences with or without
+                    scientific expertise to contribute. Each <span class="highlight">sighting</span> taken is analyzed
+                    in real-time to bring local biodiversity updates</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="text-content" data-scroll>
+                <h2>Artificial Intelligence</h2>
+                <p>We heavily depend on <span class="highlight">AI</span> for species recognition. However, we also plan
+                    to create species suggestions for data capture, responding to a user's location, migration patterns,
+                    and sighting patterns.</p>
+            </div>
+        </section>
+
+        <section class="section close-to-previous">
+            <div class="button-container" data-scroll>
+                <a href="{% url 'get_started' %}">
+                    <button class="action-button" data-delay="0">Get Started</button>
+                </a>
+                <a href="{% url 'learn_more' %}">
+                    <button class="action-button" data-delay="1">Learn More</button>
+                </a>
+                <a href="{% url 'about_us' %}">
+                    <button class="action-button" data-delay="2">About Us</button>
+                </a>
+                <a href="{% url 'legal' %}">
+                    <button class="action-button" data-delay="3">Legal</button>
+                </a>
+                <a href="{% url 'contact' %}">
+                    <button class="action-button" data-delay="4">Contact</button>
+                </a>
+            </div>
+        </section>
+
+
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "/static/core/js/build/three.webgpu.js",
+                "three/webgpu": "/static/core/js/build/three.webgpu.js",
+                "three/tsl": "/static/core/js/build/three.tsl.js",
+                "three/addons/": "/static/core/js/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+        import { uniform, varying, vec4, add, sub, max, dot, sin, mat3, uint, negate, instancedArray, cameraProjectionMatrix, cameraViewMatrix, positionLocal, modelWorldMatrix, sqrt, attribute, property, float, Fn, If, cos, Loop, Continue, normalize, instanceIndex, length, floor, fract, mod } from 'three/tsl';
+
+        let container;
+        let camera, scene, renderer;
+        let last = performance.now();
+        let pointer, raycaster;
+        let computeVelocity, computePosition, effectController;
+        let scrollY = 0;
+        let scrollVelocity = 0;
+
+        const BIRDS = 4096;
+        const SPEED_LIMIT = 9.0;
+        const BOUNDS = 800, BOUNDS_HALF = BOUNDS / 2;
+
+        // Custom Geometry - using 3 triangles each. No normals currently.
+        class BirdGeometry extends THREE.BufferGeometry {
+            constructor() {
+                super();
+
+                const trianglesPerBird = 3;
+                const triangles = BIRDS * trianglesPerBird;
+                const points = triangles * 3;
+
+                const vertices = new THREE.BufferAttribute(new Float32Array(points * 3), 3);
+                const references = new THREE.BufferAttribute(new Uint32Array(points), 1);
+                const birdVertex = new THREE.BufferAttribute(new Uint32Array(points), 1);
+
+                this.setAttribute('position', vertices);
+                this.setAttribute('reference', references);
+                this.setAttribute('birdVertex', birdVertex);
+
+                let v = 0;
+
+                function verts_push() {
+                    for (let i = 0; i < arguments.length; i++) {
+                        vertices.array[v++] = arguments[i];
+                    }
+                }
+
+                const wingsSpan = 20;
+
+                for (let f = 0; f < BIRDS; f++) {
+                    // Body
+                    verts_push(
+                        0, 0, - 20,
+                        0, - 8, 10,
+                        0, 0, 30
+                    );
+
+                    // Wings
+                    verts_push(
+                        0, 0, - 15,
+                        - wingsSpan, 0, 5,
+                        0, 0, 15
+                    );
+
+                    verts_push(
+                        0, 0, 15,
+                        wingsSpan, 0, 5,
+                        0, 0, - 15
+                    );
+                }
+
+                for (let v = 0; v < triangles * 3; v++) {
+                    const triangleIndex = ~ ~(v / 3);
+                    const birdIndex = ~ ~(triangleIndex / trianglesPerBird);
+                    references.array[v] = birdIndex;
+                    birdVertex.array[v] = v % 9;
+                }
+
+                this.scale(0.2, 0.2, 0.2);
+            }
+        }
+
+        function init() {
+            container = document.getElementById('canvas-container');
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+            camera.position.z = 1000;
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x000000, 700, 3000);
+
+            // Pointer
+            pointer = new THREE.Vector2(0, 10); // Initialize pointer with default values
+            raycaster = new THREE.Raycaster();
+
+            // Sky - Black and white gradient background
+            const geometry = new THREE.IcosahedronGeometry(1, 6);
+            const material = new THREE.MeshBasicNodeMaterial({
+                colorNode: varying(
+                    vec4(
+                        sub(0.1, positionLocal.y.mul(0.1)), // Red channel
+                        sub(0.1, positionLocal.y.mul(0.1)), // Green channel  
+                        sub(0.1, positionLocal.y.mul(0.1)), // Blue channel
+                        1.0
+                    )
+                ),
+                side: THREE.BackSide
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.z = 0.75;
+            mesh.scale.setScalar(1200);
+            scene.add(mesh);
+
+            // Renderer
+            renderer = new THREE.WebGPURenderer({
+                antialias: false,
+                forceWebGL: false,
+                powerPreference: "high-performance"
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setAnimationLoop(animate);
+            renderer.toneMapping = THREE.NeutralToneMapping;
+            container.appendChild(renderer.domElement);
+
+            // Initialize arrays
+            const positionArray = new Float32Array(BIRDS * 3);
+            const velocityArray = new Float32Array(BIRDS * 3);
+            const phaseArray = new Float32Array(BIRDS);
+
+            for (let i = 0; i < BIRDS; i++) {
+                const posX = Math.random() * BOUNDS - BOUNDS_HALF;
+                const posY = Math.random() * BOUNDS - BOUNDS_HALF;
+                const posZ = Math.random() * BOUNDS - BOUNDS_HALF;
+
+                positionArray[i * 3 + 0] = posX;
+                positionArray[i * 3 + 1] = posY;
+                positionArray[i * 3 + 2] = posZ;
+
+                const velX = Math.random() - 0.5;
+                const velY = Math.random() - 0.5;
+                const velZ = Math.random() - 0.5;
+
+                velocityArray[i * 3 + 0] = velX * 10;
+                velocityArray[i * 3 + 1] = velY * 10;
+                velocityArray[i * 3 + 2] = velZ * 10;
+
+                phaseArray[i] = 1;
+            }
+
+            const positionStorage = instancedArray(positionArray, 'vec3').label('positionStorage');
+            const velocityStorage = instancedArray(velocityArray, 'vec3').label('velocityStorage');
+            const phaseStorage = instancedArray(phaseArray, 'float').label('phaseStorage');
+
+            positionStorage.setPBO(true);
+            velocityStorage.setPBO(true);
+            phaseStorage.setPBO(true);
+
+            effectController = {
+                separation: uniform(15.0).label('separation'),
+                alignment: uniform(20.0).label('alignment'),
+                cohesion: uniform(20.0).label('cohesion'),
+                freedom: uniform(0.75).label('freedom'),
+                now: uniform(0.0),
+                deltaTime: uniform(0.0).label('deltaTime'),
+                rayOrigin: uniform(new THREE.Vector3()).label('rayOrigin'),
+                rayDirection: uniform(new THREE.Vector3()).label('rayDirection'),
+                isScrolling: uniform(0.0).label('isScrolling'),
+                scrollVel: uniform(0.0).label('scrollVel'),
+                scrollPos: uniform(0.0).label('scrollPos')
+            };
+
+            // Bird geometry and material
+            const birdGeometry = new BirdGeometry();
+            const birdMaterial = new THREE.NodeMaterial();
+
+            const birdVertexTSL = Fn(() => {
+                const reference = attribute('reference');
+                const birdVertex = attribute('birdVertex');
+
+                const position = positionLocal.toVar();
+                const newPhase = phaseStorage.element(reference).toVar();
+                const newVelocity = normalize(velocityStorage.element(reference)).toVar();
+
+                If(birdVertex.equal(4).or(birdVertex.equal(7)), () => {
+                    position.y = sin(newPhase).mul(5.0);
+                });
+
+                const newPosition = modelWorldMatrix.mul(position);
+
+                newVelocity.z.mulAssign(- 1.0);
+                const xz = length(newVelocity.xz);
+                const xyz = float(1.0);
+                const x = sqrt((newVelocity.y.mul(newVelocity.y)).oneMinus());
+
+                const cosry = newVelocity.x.div(xz).toVar();
+                const sinry = newVelocity.z.div(xz).toVar();
+                const cosrz = x.div(xyz);
+                const sinrz = newVelocity.y.div(xyz).toVar();
+
+                const maty = mat3(
+                    cosry, 0, negate(sinry),
+                    0, 1, 0,
+                    sinry, 0, cosry
+                );
+
+                const matz = mat3(
+                    cosrz, sinrz, 0,
+                    negate(sinrz), cosrz, 0,
+                    0, 0, 1
+                );
+
+                const finalVert = maty.mul(matz).mul(newPosition);
+                finalVert.addAssign(positionStorage.element(reference));
+
+                return cameraProjectionMatrix.mul(cameraViewMatrix).mul(finalVert);
+            });
+
+            birdMaterial.vertexNode = birdVertexTSL();
+            birdMaterial.side = THREE.DoubleSide;
+            birdMaterial.colorNode = vec4(1.0, 1.0, 1.0, 1.0); // White birds
+
+            const birdMesh = new THREE.Mesh(birdGeometry, birdMaterial);
+            birdMesh.rotation.y = Math.PI / 2;
+            birdMesh.matrixAutoUpdate = false;
+            birdMesh.frustumCulled = false;
+            birdMesh.updateMatrix();
+
+            // Compute shaders
+            computeVelocity = Fn(() => {
+                const PI = float(3.141592653589793);
+                const PI_2 = PI.mul(2.0);
+                const limit = property('float', 'limit').assign(SPEED_LIMIT);
+
+                const { alignment, separation, cohesion, deltaTime, rayOrigin, rayDirection, isScrolling, scrollVel, scrollPos, now } = effectController;
+
+                // Adjust flocking parameters based on scroll position (not just active scrolling)
+                const formationTightness = scrollPos.mul(2.0); // More scroll = tighter formation
+                const scrollCohesion = cohesion.add(isScrolling.mul(25.0)).add(formationTightness.mul(15.0)); // Stronger grouping when scrolled
+                const scrollSeparation = separation.mul(float(1.0).sub(isScrolling.mul(0.4)).sub(formationTightness.mul(0.3))); // Less separation when scrolled
+
+                const zoneRadius = scrollSeparation.add(alignment).add(scrollCohesion).toConst();
+                const separationThresh = scrollSeparation.div(zoneRadius).toConst();
+                const alignmentThresh = (scrollSeparation.add(alignment)).div(zoneRadius).toConst();
+                const zoneRadiusSq = zoneRadius.mul(zoneRadius).toConst();
+
+                const birdIndex = instanceIndex.toConst('birdIndex');
+                const position = positionStorage.element(birdIndex).toVar();
+                const velocity = velocityStorage.element(birdIndex).toVar();
+
+                // Mouse interaction
+                const directionToRay = rayOrigin.sub(position).toConst();
+                const projectionLength = dot(directionToRay, rayDirection).toConst();
+                const closestPoint = rayOrigin.sub(rayDirection.mul(projectionLength)).toConst();
+                const directionToClosestPoint = closestPoint.sub(position).toConst();
+                const distanceToClosestPoint = length(directionToClosestPoint).toConst();
+                const distanceToClosestPointSq = distanceToClosestPoint.mul(distanceToClosestPoint).toConst();
+
+                const rayRadius = float(150.0).toConst();
+                const rayRadiusSq = rayRadius.mul(rayRadius).toConst();
+
+                If(distanceToClosestPointSq.lessThan(rayRadiusSq), () => {
+                    const velocityAdjust = (distanceToClosestPointSq.div(rayRadiusSq).sub(1.0)).mul(deltaTime).mul(100.0);
+                    velocity.addAssign(normalize(directionToClosestPoint).mul(velocityAdjust));
+                    limit.addAssign(5.0);
+                });
+
+                // Gentle center attraction to keep birds in view
+                const dirToCenter = position.toVar();
+                dirToCenter.y.mulAssign(2.5);
+                velocity.subAssign(normalize(dirToCenter).mul(deltaTime).mul(4.0));
+
+                // Standard flocking behavior
+                Loop({ start: uint(0), end: uint(BIRDS), type: 'uint', condition: '<' }, ({ i }) => {
+                    If(i.equal(birdIndex), () => {
+                        Continue();
+                    });
+
+                    const birdPosition = positionStorage.element(i);
+                    const dirToBird = birdPosition.sub(position);
+                    const distToBird = length(dirToBird);
+
+                    If(distToBird.lessThan(0.0001), () => {
+                        Continue();
+                    });
+
+                    const distToBirdSq = distToBird.mul(distToBird);
+
+                    If(distToBirdSq.greaterThan(zoneRadiusSq), () => {
+                        Continue();
+                    });
+
+                    const percent = distToBirdSq.div(zoneRadiusSq);
+
+                    If(percent.lessThan(separationThresh), () => {
+                        const velocityAdjust = (separationThresh.div(percent).sub(1.0)).mul(deltaTime);
+                        velocity.subAssign(normalize(dirToBird).mul(velocityAdjust));
+                    }).ElseIf(percent.lessThan(alignmentThresh), () => {
+                        const threshDelta = alignmentThresh.sub(separationThresh);
+                        const adjustedPercent = (percent.sub(separationThresh)).div(threshDelta);
+                        const birdVelocity = velocityStorage.element(i);
+
+                        const cosRange = cos(adjustedPercent.mul(PI_2));
+                        const cosRangeAdjust = float(0.5).sub(cosRange.mul(0.5)).add(0.5);
+                        const velocityAdjust = cosRangeAdjust.mul(deltaTime);
+                        velocity.addAssign(normalize(birdVelocity).mul(velocityAdjust));
+                    }).Else(() => {
+                        const threshDelta = alignmentThresh.oneMinus();
+                        const adjustedPercent = threshDelta.equal(0.0).select(1.0, (percent.sub(alignmentThresh)).div(threshDelta));
+
+                        const cosRange = cos(adjustedPercent.mul(PI_2));
+                        const adj1 = cosRange.mul(- 0.5);
+                        const adj2 = adj1.add(0.5);
+                        const adj3 = float(0.5).sub(adj2);
+
+                        const velocityAdjust = adj3.mul(deltaTime);
+                        velocity.addAssign(normalize(dirToBird).mul(velocityAdjust));
+                    });
+                });
+
+                If(length(velocity).greaterThan(limit), () => {
+                    velocity.assign(normalize(velocity).mul(limit));
+                });
+
+                velocityStorage.element(birdIndex).assign(velocity);
+            })().compute(BIRDS);
+
+            computePosition = Fn(() => {
+                const { deltaTime } = effectController;
+                positionStorage.element(instanceIndex).addAssign(velocityStorage.element(instanceIndex).mul(deltaTime).mul(15.0));
+
+                const velocity = velocityStorage.element(instanceIndex);
+                const phase = phaseStorage.element(instanceIndex);
+
+                const modValue = phase.add(deltaTime).add(length(velocity.xz).mul(deltaTime).mul(3.0)).add(max(velocity.y, 0.0).mul(deltaTime).mul(6.0));
+                phaseStorage.element(instanceIndex).assign(modValue.mod(62.83));
+            })().compute(BIRDS);
+
+            scene.add(birdMesh);
+
+            // Event listeners
+            container.style.touchAction = 'none';
+            document.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('resize', onWindowResize);
+
+            // Initialize scroll animations
+            initScrollAnimations();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onPointerMove(event) {
+            if (event.isPrimary === false) return;
+            pointer.x = (event.clientX / window.innerWidth) * 2.0 - 1.0;
+            pointer.y = 1.0 - (event.clientY / window.innerHeight) * 2.0;
+        }
+
+        function animate() {
+            render();
+        }
+
+        function render() {
+            const now = performance.now();
+            let deltaTime = (now - last) / 1000;
+
+            if (deltaTime > 1) deltaTime = 1;
+            last = now;
+
+            // Detect if user is actively scrolling
+            const isScrolling = Math.abs(scrollVelocity) > 0.5 ? 1.0 : 0.0;
+            const normalizedScrollVel = Math.max(-1, Math.min(1, scrollVelocity / 20));
+            const normalizedScrollPos = Math.min(1.0, Math.max(0.0, scrollY / (document.body.scrollHeight - window.innerHeight)));
+
+            // Mouse interaction
+            const combinedPointer = {
+                x: pointer.x,
+                y: pointer.y
+            };
+
+            raycaster.setFromCamera(combinedPointer, camera);
+
+            // Update uniforms
+            effectController.now.value = now;
+            effectController.deltaTime.value = deltaTime;
+            effectController.rayOrigin.value.copy(raycaster.ray.origin);
+            effectController.rayDirection.value.copy(raycaster.ray.direction);
+            effectController.isScrolling.value = isScrolling;
+            effectController.scrollVel.value = normalizedScrollVel;
+            effectController.scrollPos.value = normalizedScrollPos;
+
+            renderer.compute(computeVelocity);
+            renderer.compute(computePosition);
+            renderer.render(scene, camera);
+
+            // Smoothly decay scroll velocity
+            scrollVelocity *= 0.95;
+        }
+
+        // Scroll-based animation
+        function initScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1, // Reduced from 0.3 to 0.1 for earlier triggering
+                rootMargin: '0px 0px -50px 0px' // Reduced from -100px to -50px
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    } else {
+                        // Remove visible class when element goes out of view
+                        entry.target.classList.remove('visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('[data-scroll]').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Immediately show the first section button container
+            const firstSectionButton = document.querySelector('.first-section .button-container');
+            if (firstSectionButton) {
+                firstSectionButton.classList.add('visible');
+            }
+
+            // Trigger animation for other elements already in view on page load
+            setTimeout(() => {
+                document.querySelectorAll('[data-scroll]').forEach(el => {
+                    // Skip first section as it's already handled above
+                    if (el.closest('.first-section')) return;
+
+                    const rect = el.getBoundingClientRect();
+                    const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+                    if (isInView) {
+                        el.classList.add('visible');
+                    }
+                });
+            }, 100); // Small delay to ensure page is fully loaded
+
+            // Note: Scroll tracking is now handled by Lenis (see bottom of script)
+        }
+
+        init();
+
+        // Initialize Lenis Smooth Scrolling
+        let lenis;
+        let lenisRetryCount = 0;
+        const maxRetries = 50;
+
+        // Wait for Lenis to be available
+        function initializeLenis() {
+            lenisRetryCount++;
+
+            // Check if Lenis is available
+            if (typeof Lenis === 'undefined') {
+                console.log('Waiting for Lenis to load...', lenisRetryCount);
+
+                // After max retries, enable native smooth scrolling
+                if (lenisRetryCount > maxRetries) {
+                    console.log('Lenis failed to load, using native smooth scroll');
+                    document.documentElement.style.scrollBehavior = 'smooth';
+                    initScrollTracking();
+                    return;
+                }
+
+                setTimeout(initializeLenis, 100);
+                return;
+            }
+
+            console.log('Lenis found! Initializing...');
+
+            try {
+                lenis = new Lenis({
+                    duration: 1.2,
+                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                    direction: 'vertical',
+                    gestureDirection: 'vertical',
+                    smooth: true,
+                    mouseMultiplier: 1,
+                    smoothTouch: false,
+                    touchMultiplier: 2,
+                    infinite: false,
+                });
+
+                // Integrate Lenis with the animation loop
+                function raf(time) {
+                    lenis.raf(time);
+                    requestAnimationFrame(raf);
+                }
+
+                requestAnimationFrame(raf);
+
+                console.log('Lenis initialized successfully!');
+                initScrollTracking();
+
+            } catch (error) {
+                console.error('Error initializing Lenis:', error);
+                console.log('Falling back to native smooth scroll');
+                document.documentElement.style.scrollBehavior = 'smooth';
+                initScrollTracking();
+            }
+        }
+
+        // Simple scroll tracking for bird behavior only
+        function initScrollTracking() {
+            function updateScrollTracking() {
+                const currentScrollY = lenis ? (lenis.scroll || 0) : (window.pageYOffset || document.documentElement.scrollTop || 0);
+                scrollVelocity = currentScrollY - scrollY;
+                scrollY = currentScrollY;
+            }
+
+            if (lenis) {
+                lenis.on('scroll', updateScrollTracking);
+            } else {
+                window.addEventListener('scroll', updateScrollTracking, { passive: true });
+            }
+        }
+
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeLenis);
+        } else {
+            initializeLenis();
+        }
+
+    </script>
+</body>
+
+</html>

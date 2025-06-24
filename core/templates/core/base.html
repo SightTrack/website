@@ -1,0 +1,122 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{% block title %}SightTrack{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
+
+    <!-- Lenis Smooth Scrolling - Multiple CDN fallbacks -->
+    <script>
+        // Try multiple CDN sources for Lenis
+        const lenisCDNs = [
+            'https://unpkg.com/lenis@1.0.45/dist/lenis.min.js',
+            'https://cdn.jsdelivr.net/npm/lenis@1.0.45/dist/lenis.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/lenis/1.0.29/lenis.min.js'
+        ];
+
+        let lenisLoaded = false;
+        let currentCDNIndex = 0;
+
+        function loadLenisFromCDN(index = 0) {
+            if (index >= lenisCDNs.length) {
+                console.log('All Lenis CDNs failed, will use native scroll');
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = lenisCDNs[index];
+            script.onload = function () {
+                lenisLoaded = true;
+                console.log(`Lenis loaded successfully from: ${lenisCDNs[index]}`);
+            };
+            script.onerror = function () {
+                console.log(`Failed to load Lenis from: ${lenisCDNs[index]}`);
+                loadLenisFromCDN(index + 1);
+            };
+            document.head.appendChild(script);
+        }
+
+        // Start loading Lenis immediately
+        loadLenisFromCDN();
+    </script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    {% block content %}{% endblock %}
+
+    <!-- Lenis Initialization Script -->
+    <script>
+        // Initialize Lenis Smooth Scrolling
+        let lenis;
+        let lenisRetryCount = 0;
+        const maxRetries = 50;
+
+        // Wait for Lenis to be available
+        function initializeLenis() {
+            lenisRetryCount++;
+
+            // Check if Lenis is available
+            if (typeof Lenis === 'undefined') {
+                console.log('Waiting for Lenis to load...', lenisRetryCount);
+
+                // After max retries, enable native smooth scrolling
+                if (lenisRetryCount > maxRetries) {
+                    console.log('Lenis failed to load, using native smooth scroll');
+                    document.documentElement.style.scrollBehavior = 'smooth';
+                    return;
+                }
+
+                setTimeout(initializeLenis, 100);
+                return;
+            }
+
+            console.log('Lenis found! Initializing...');
+
+            try {
+                lenis = new Lenis({
+                    duration: 1.2,
+                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                    direction: 'vertical',
+                    gestureDirection: 'vertical',
+                    smooth: true,
+                    mouseMultiplier: 1,
+                    smoothTouch: false,
+                    touchMultiplier: 2,
+                    infinite: false,
+                });
+
+                // Integrate Lenis with the animation loop
+                function raf(time) {
+                    lenis.raf(time);
+                    requestAnimationFrame(raf);
+                }
+
+                requestAnimationFrame(raf);
+
+                console.log('Lenis initialized successfully!');
+
+            } catch (error) {
+                console.error('Error initializing Lenis:', error);
+                console.log('Falling back to native smooth scroll');
+                document.documentElement.style.scrollBehavior = 'smooth';
+            }
+        }
+
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeLenis);
+        } else {
+            initializeLenis();
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,859 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Contact - SightTrack{% endblock %}
+
+{% block extra_head %}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<link rel="icon" href="{% static 'images/favicon.png' %}">
+<style>
+    html {
+        overscroll-behavior: none;
+        background: #000000;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: white;
+        overflow-x: hidden;
+        overscroll-behavior: none;
+        background-attachment: fixed;
+        background-size: 100% 100%;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 2rem;
+        left: 2rem;
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        text-decoration: none;
+        color: white;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+    }
+
+    .back-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .back-button:hover::before {
+        opacity: 1;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .back-arrow {
+        width: 24px;
+        height: 24px;
+        position: relative;
+    }
+
+    .back-arrow::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(45deg);
+        transform-origin: left center;
+    }
+
+    .back-arrow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        transform-origin: left center;
+    }
+
+    .hero-section {
+        text-align: center;
+        padding: 4rem 2rem 2rem;
+        background: rgba(255, 255, 255, 0.01);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        margin-bottom: 3rem;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        margin: 0 0 1.5rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .subtitle {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        line-height: 1.6;
+        color: #cccccc;
+        margin: 0;
+        font-weight: 300;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .contact-form {
+        background: rgba(255, 255, 255, 0.01);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+    }
+
+    .contact-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .success-message {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: #22c55e;
+        text-align: center;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .error-message {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: #ef4444;
+        text-align: center;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .contact-info {
+        background: rgba(255, 255, 255, 0.01);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s both;
+    }
+
+    .contact-info::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 500;
+        color: #ffffff;
+        margin: 0 0 2rem 0;
+        letter-spacing: -0.01em;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 1rem;
+        font-weight: 400;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #ffffff;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+        color: #888888;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* CAPTCHA styling */
+    .captcha-container {
+        margin: 1.5rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+        box-shadow:
+            0 4px 16px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .captcha-container:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .captcha-container label {
+        color: #ffffff !important;
+        font-size: 0.9rem !important;
+        font-weight: 400 !important;
+        margin-bottom: 1rem !important;
+        text-align: center;
+        display: block;
+    }
+
+    .captcha-container .captcha {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .captcha-container .captcha img {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px;
+    }
+
+    .captcha-container .captcha input {
+        width: 200px !important;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 8px !important;
+        padding: 0.8rem 1rem !important;
+        color: #ffffff !important;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        margin: 0 !important;
+    }
+
+    .captcha-container .captcha input:focus {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.25) !important;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+        outline: none !important;
+    }
+
+    .captcha-container .captcha input::placeholder {
+        color: #999999 !important;
+        font-weight: 400;
+    }
+
+    /* Refresh button styling if present */
+    .captcha-container .captcha-refresh {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 6px;
+        color: #ffffff;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+
+    .captcha-container .captcha-refresh:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-1px);
+    }
+
+    /* Error styling for CAPTCHA */
+    .captcha-container .errorlist {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 1rem 0 0 0 !important;
+        color: #ef4444 !important;
+        font-size: 0.9rem !important;
+        text-align: center;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        padding: 0.75rem 1rem !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .captcha-container .errorlist li {
+        margin: 0 !important;
+    }
+
+    /* Form validation styling */
+    .form-group .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        color: #ef4444;
+        font-size: 0.9rem;
+    }
+
+    .form-group .errorlist li {
+        margin-bottom: 0.25rem;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        color: #ffffff;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(20px);
+        box-shadow:
+            0 4px 16px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .submit-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .contact-method {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-method:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .contact-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.5rem;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .contact-icon img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .contact-details h3 {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #ffffff;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .contact-details p {
+        font-size: 1rem;
+        color: #cccccc;
+        margin: 0;
+        font-weight: 300;
+    }
+
+    .contact-details a {
+        color: #ffffff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .contact-details a:hover {
+        color: #cccccc;
+    }
+
+    .office-info {
+        background: rgba(255, 255, 255, 0.01);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin-top: 2rem;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+    }
+
+    .office-info::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .office-hours {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .hours-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+    }
+
+    .hours-day {
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    .hours-time {
+        color: #cccccc;
+        font-weight: 300;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .back-button {
+            top: 1rem;
+            left: 1rem;
+            width: 50px;
+            height: 50px;
+        }
+
+        .hero-section {
+            padding: 3rem 1.5rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .contact-form,
+        .contact-info,
+        .office-info {
+            padding: 2rem 1.5rem;
+        }
+
+        .contact-method {
+            padding: 1rem;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .office-hours {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'index' %}" class="back-button">
+    <div class="back-arrow"></div>
+</a>
+
+<div class="container">
+    <div class="hero-section">
+        <h1>Contact Us</h1>
+        <p class="subtitle">Get in touch with our team. We're here to help with any questions about SightTrack and
+            wildlife conservation.</p>
+    </div>
+
+    <div class="contact-grid">
+        <div class="contact-form">
+            <h2 class="section-title">Send us a Message</h2>
+
+            {% if success %}
+            <div class="success-message">
+                <strong>Message sent successfully!</strong> We'll get back to you within 24 hours.
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="error-message">
+                {% if error_message %}
+                <strong>Error:</strong> {{ error_message }}
+                {% else %}
+                <strong>Error:</strong> Please correct the errors below and try again.
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'contact' %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Full Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div style="color: #ef4444; font-size: 0.9rem; margin-top: 0.5rem;">
+                        {% for error in form.name.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div style="color: #ef4444; font-size: 0.9rem; margin-top: 0.5rem;">
+                        {% for error in form.email.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.subject.id_for_label }}">Subject</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                    <div style="color: #ef4444; font-size: 0.9rem; margin-top: 0.5rem;">
+                        {% for error in form.subject.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.message.id_for_label }}">Message</label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                    <div style="color: #ef4444; font-size: 0.9rem; margin-top: 0.5rem;">
+                        {% for error in form.message.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="captcha-container">
+                    {{ form.captcha }}
+                    {% if form.captcha.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.captcha.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="submit-button" id="submit-btn">Send Message</button>
+            </form>
+        </div>
+
+        <div class="contact-info">
+            <h2 class="section-title">Get in Touch</h2>
+
+            <div class="contact-method">
+                <div class="contact-icon">📧</div>
+                <div class="contact-details">
+                    <h3>Email</h3>
+                    <p><a href="mailto:contact@sighttrack.org">contact@sighttrack.org</a></p>
+                </div>
+            </div>
+
+            <div class="contact-method">
+                <div class="contact-icon">📍</div>
+                <div class="contact-details">
+                    <h3>Address</h3>
+                    <p>Toronto, ON, Canada</p>
+                </div>
+            </div>
+
+            <div class="contact-method">
+                <div class="contact-icon">
+                    <img src="{% static 'images/instagram.png' %}" alt="Instagram">
+                </div>
+                <div class="contact-details">
+                    <h3>Instagram</h3>
+                    <p>@sighttrack</p>
+                </div>
+            </div>
+
+            <div class="contact-method">
+                <div class="contact-icon">
+                    <img src="{% static 'images/tiktok.png' %}" alt="TikTok">
+                </div>
+                <div class="contact-details">
+                    <h3>TikTok</h3>
+                    <p>@sighttrack</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="office-info">
+        <h2 class="section-title">Office Hours</h2>
+        <p style="color: #cccccc; margin-bottom: 1.5rem; font-weight: 300;">Our team is available during the
+            following hours (Pacific Time):</p>
+
+        <div class="office-hours">
+            <div class="hours-item">
+                <span class="hours-day">Monday - Friday</span>
+                <span class="hours-time">9:00 AM - 6:00 PM</span>
+            </div>
+            <div class="hours-item">
+                <span class="hours-day">Saturday</span>
+                <span class="hours-time">10:00 AM - 4:00 PM</span>
+            </div>
+            <div class="hours-item">
+                <span class="hours-day">Sunday</span>
+                <span class="hours-time">Closed</span>
+            </div>
+        </div>
+
+        <p style="color: #cccccc; margin-top: 1.5rem; font-size: 0.9rem; font-weight: 300;">
+            <strong>Response Time:</strong> We typically respond to emails within 24 hours during business days.
+        </p>
+    </div>
+</div>
+
+<script>
+    // Client-side form validation and spam prevention
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        const submitBtn = document.getElementById('submit-btn');
+        let isSubmitting = false;
+
+        form.addEventListener('submit', function (e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                return;
+            }
+
+            // Basic client-side spam detection
+            const message = document.getElementById('message').value.toLowerCase();
+            const spamKeywords = ['viagra', 'casino', 'lottery', 'bitcoin', 'cryptocurrency', 'seo', 'backlinks'];
+
+            for (let keyword of spamKeywords) {
+                if (message.includes(keyword)) {
+                    e.preventDefault();
+                    alert('Your message contains content that cannot be sent.');
+                    return;
+                }
+            }
+
+            // Check for excessive URLs
+            const urlRegex = /https?:\/\/[^\s]+/g;
+            const urls = message.match(urlRegex) || [];
+            if (urls.length > 2) {
+                e.preventDefault();
+                alert('Please limit the number of links in your message.');
+                return;
+            }
+
+            // Prevent double submission
+            isSubmitting = true;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+
+            // Re-enable after 5 seconds in case of error
+            setTimeout(() => {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+            }, 5000);
+        });
+
+        // Character counter for message field
+        const messageField = document.getElementById('message');
+        const maxLength = 2000;
+
+        messageField.addEventListener('input', function () {
+            const remaining = maxLength - this.value.length;
+            let counter = document.getElementById('char-counter');
+
+            if (!counter) {
+                counter = document.createElement('div');
+                counter.id = 'char-counter';
+                counter.style.cssText = 'font-size: 0.8rem; color: #888; text-align: right; margin-top: 0.5rem;';
+                this.parentNode.appendChild(counter);
+            }
+
+            counter.textContent = `${remaining} characters remaining`;
+            counter.style.color = remaining < 100 ? '#ef4444' : '#888';
+        });
+    });
+</script>
+{% endblock %}

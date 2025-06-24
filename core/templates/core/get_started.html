@@ -1,0 +1,395 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Get Started - SightTrack{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: white;
+        overflow-x: hidden;
+        overscroll-behavior: none;
+        background-attachment: fixed;
+        background-size: 100% 100%;
+    }
+
+    html {
+        overscroll-behavior: none;
+        background: #000000;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 2rem;
+        left: 2rem;
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        text-decoration: none;
+        color: white;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+    }
+
+    .back-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .back-button:hover::before {
+        opacity: 1;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .back-arrow {
+        width: 24px;
+        height: 24px;
+        position: relative;
+    }
+
+    .back-arrow::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(45deg);
+        transform-origin: left center;
+    }
+
+    .back-arrow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        transform-origin: left center;
+    }
+
+    .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 4rem 0;
+    }
+
+    .content-card {
+        background: rgba(255, 255, 255, 0.01);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .content-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        margin: 0 0 1.5rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    h2 {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        margin: 0 0 1rem 0;
+        color: #ffffff;
+    }
+
+    p {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        line-height: 1.6;
+        color: #cccccc;
+        margin: 0 0 1.5rem 0;
+        font-weight: 300;
+    }
+
+    .highlight {
+        color: #ffffff;
+        font-weight: 400;
+    }
+
+    .step-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+        width: 100%;
+    }
+
+    .step-card {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: left;
+        transition: all 0.3s ease;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .step-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .step-card:hover::before {
+        opacity: 1;
+    }
+
+    .step-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .step-number {
+        font-size: 2rem;
+        font-weight: 300;
+        color: #888;
+        margin-bottom: 1rem;
+    }
+
+    .step-card h3 {
+        font-size: 1.3rem;
+        font-weight: 400;
+        margin: 0 0 1rem 0;
+        color: #ffffff;
+    }
+
+    .step-card p {
+        font-size: 1rem;
+        margin: 0;
+        color: #cccccc;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .content {
+            padding: 2rem 0;
+        }
+
+        .content-card {
+            padding: 2rem;
+        }
+
+        .step-container {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    .download-button-container {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .download-button {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem 3rem;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .download-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .download-button:hover::before {
+        opacity: 1;
+    }
+
+    .download-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .download-text {
+        font-size: 1.3rem;
+        font-weight: 400;
+        margin-bottom: 0.25rem;
+        color: #ffffff;
+    }
+
+    .download-subtitle {
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: #cccccc;
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'index' %}" class="back-button">
+    <div class="back-arrow"></div>
+</a>
+
+<div class="container">
+    <div class="content">
+        <div class="content-card">
+            <h1>Get Started</h1>
+            <h2>Ready to contribute to wildlife conservation?</h2>
+            <p>Join our community of citizen scientists and help us track and protect biodiversity around the world.
+                Every sighting matters.</p>
+
+            <div class="step-container">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Create Account</h3>
+                    <p>Sign up for your free SightTrack account to start logging wildlife sightings.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Explore Nature</h3>
+                    <p>Go outside and observe the wildlife around you - from your backyard to remote locations.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Take Photos</h3>
+                    <p>Capture clear photos of animals and plants you encounter using your smartphone or camera.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3>Log Sightings</h3>
+                    <p>Upload your photos and add location data to contribute to our global biodiversity database.</p>
+                </div>
+            </div>
+
+            <div class="download-button-container">
+                <a href="https://apps.apple.com/ca/app/sighttrack/id6737868168" class="download-button">
+                    <span class="download-text">Download App</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,794 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Learn More - SightTrack{% endblock %}
+
+{% block extra_head %}
+<style>
+    html {
+        overscroll-behavior: none;
+        background: #000000;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: white;
+        overflow-x: hidden;
+        overscroll-behavior: none;
+        background-attachment: fixed;
+        background-size: 100% 100%;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 2rem;
+        left: 2rem;
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        text-decoration: none;
+        color: white;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+    }
+
+    .back-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .back-button:hover::before {
+        opacity: 1;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .back-arrow {
+        width: 24px;
+        height: 24px;
+        position: relative;
+    }
+
+    .back-arrow::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(45deg);
+        transform-origin: left center;
+    }
+
+    .back-arrow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        transform-origin: left center;
+    }
+
+    .content-section {
+        background: rgba(255, 255, 255, 0.01);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .content-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .hero-section {
+        text-align: center;
+        padding: 4rem 3rem 3rem;
+    }
+
+    .content-section:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .content-section:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .content-section:nth-child(4) {
+        animation-delay: 0.3s;
+    }
+
+    .content-section:nth-child(5) {
+        animation-delay: 0.4s;
+    }
+
+    .content-section:nth-child(6) {
+        animation-delay: 0.5s;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        margin: 0 0 1.5rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    h2 {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        margin: 0 0 1.5rem 0;
+        color: #ffffff;
+    }
+
+    h3 {
+        font-size: clamp(1.2rem, 3vw, 1.8rem);
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        margin: 0 0 1rem 0;
+        color: #ffffff;
+    }
+
+    p {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        line-height: 1.6;
+        color: #cccccc;
+        margin: 0 0 1.5rem 0;
+        font-weight: 300;
+    }
+
+    .highlight {
+        color: #ffffff;
+        font-weight: 400;
+    }
+
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: #cccccc;
+        font-weight: 300;
+    }
+
+    .cta-button {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        color: white;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin: 1rem 0.5rem 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .cta-button:hover::before {
+        left: 100%;
+    }
+
+    .cta-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .back-button {
+            top: 1rem;
+            left: 1rem;
+            width: 50px;
+            height: 50px;
+        }
+
+        .content-section {
+            padding: 2rem;
+        }
+
+        .hero-section {
+            padding: 3rem 2rem 2rem;
+        }
+    }
+
+    .gallery-section {
+        text-align: center;
+    }
+
+    .gallery-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2rem 0;
+        margin: 2rem 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        position: relative;
+        /* Prevent lenis from interfering with horizontal scroll */
+        overscroll-behavior-x: contain;
+        scroll-behavior: smooth;
+    }
+
+    .gallery-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Disable lenis on gallery container */
+    .gallery-container {
+        pointer-events: auto;
+    }
+
+    .gallery-scroll {
+        display: flex;
+        gap: 2rem;
+        padding: 0 2rem;
+        width: max-content;
+        /* Ensure smooth scrolling */
+        will-change: transform;
+    }
+
+    .preview-card {
+        flex-shrink: 0;
+        width: 200px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        /* Enable smooth transitions */
+        will-change: transform;
+    }
+
+    .preview-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-5px) scale(1.02);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .preview-image {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+        /* Prevent image dragging */
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+
+    .preview-card:hover .preview-image {
+        transform: scale(1.05);
+    }
+
+    /* Gallery Controls */
+    .gallery-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .scroll-btn {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 1.2rem;
+        user-select: none;
+    }
+
+    .scroll-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    .scroll-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .scroll-btn:disabled:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .scroll-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .scroll-dots {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .scroll-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .scroll-dot.active {
+        background: rgba(255, 255, 255, 0.8);
+        transform: scale(1.2);
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .gallery-container {
+            /* Better touch scrolling on mobile */
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+
+        .preview-card {
+            scroll-snap-align: center;
+            width: 160px;
+        }
+
+        .scroll-btn {
+            display: none;
+        }
+    }
+
+    /* Touch-friendly scrolling */
+    .gallery-container {
+        touch-action: pan-x;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'index' %}" class="back-button">
+    <div class="back-arrow"></div>
+</a>
+
+<div class="container">
+    <div class="content-section hero-section">
+        <h1>Learn More</h1>
+        <p>Discover how SightTrack is revolutionizing wildlife conservation through citizen science and cutting-edge
+            AI technology.</p>
+    </div>
+
+    <div class="content-section">
+        <h2>Our Mission</h2>
+        <p>SightTrack empowers everyday people to become <span class="highlight">citizen scientists</span>,
+            contributing valuable data to wildlife conservation efforts worldwide. Through our innovative platform,
+            we're building the most comprehensive database of <span class="highlight">biodiversity
+                observations</span> ever created.</p>
+        <p>Every photo you take, every species you identify, and every location you record helps scientists,
+            researchers, and conservationists better understand and protect our planet's incredible biodiversity.
+        </p>
+    </div>
+
+    <div class="content-section">
+        <h2>Key Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered Identification</h3>
+                <p>Our advanced machine learning algorithms can identify thousands of species instantly from your
+                    photos with <span class="highlight">95%+ accuracy</span>.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Geolocation Tracking</h3>
+                <p>Automatic location tagging helps map species distribution and track <span class="highlight">migration
+                        patterns</span> over time.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Global Community</h3>
+                <p>Connect with naturalists, researchers, and conservation enthusiasts from around the world in our
+                    <span class="highlight">collaborative platform</span>.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Real-time Analytics</h3>
+                <p>Track biodiversity trends in your area and contribute to <span class="highlight">scientific
+                        research</span> with real-time data analysis.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Impact by the Numbers</h2>
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number">500K+</div>
+                <div class="stat-label">Identifiable Species</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">150+</div>
+                <div class="stat-label">Countries Covered</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>How It Works</h2>
+        <p>SightTrack combines the power of <span class="highlight">computer vision</span>, <span
+                class="highlight">machine learning</span>, and <span class="highlight">citizen science</span> to
+            create a comprehensive wildlife monitoring system:</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>1. Capture</h3>
+                <p>Take photos of wildlife and plants using your smartphone camera through our intuitive app
+                    interface.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>2. Identify</h3>
+                <p>Our AI instantly analyzes your photos to identify species, providing detailed information and
+                    confidence scores.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>3. Verify</h3>
+                <p>Expert naturalists and community members can verify identifications to ensure data accuracy.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>4. Contribute</h3>
+                <p>Your verified observations become part of a global database used by researchers and
+                    conservationists.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section gallery-section">
+        <h2>App Preview</h2>
+        <p>Take a look at the SightTrack app interface and discover how easy it is to contribute to <span
+                class="highlight">wildlife conservation</span>.</p>
+
+        <div class="gallery-container" id="galleryContainer">
+            <div class="gallery-scroll" id="galleryScroll">
+                <div class="preview-card">
+                    <img src="{% static 'images/previews/preview1.png' %}" alt="SightTrack App Preview 1"
+                        class="preview-image">
+                </div>
+                <div class="preview-card">
+                    <img src="{% static 'images/previews/preview2.png' %}" alt="SightTrack App Preview 2"
+                        class="preview-image">
+                </div>
+                <div class="preview-card">
+                    <img src="{% static 'images/previews/preview3.png' %}" alt="SightTrack App Preview 3"
+                        class="preview-image">
+                </div>
+                <div class="preview-card">
+                    <img src="{% static 'images/previews/preview4.png' %}" alt="SightTrack App Preview 4"
+                        class="preview-image">
+                </div>
+                <div class="preview-card">
+                    <img src="{% static 'images/previews/preview5.png' %}" alt="SightTrack App Preview 5"
+                        class="preview-image">
+                </div>
+                <div class="preview-card">
+                    <img src="{% static 'images/previews/preview6.png' %}" alt="SightTrack App Preview 6"
+                        class="preview-image">
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-controls">
+            <button class="scroll-btn" id="scrollLeft">‹</button>
+            <div class="scroll-indicator">
+                <div class="scroll-dots" id="scrollDots">
+                    <!-- Dots will be generated by JavaScript -->
+                </div>
+            </div>
+            <button class="scroll-btn" id="scrollRight">›</button>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Ready to Make a Difference?</h2>
+        <p>Join thousands of citizen scientists who are helping to protect biodiversity around the world. Every
+            observation matters, and your contribution can help save endangered species and preserve ecosystems for
+            future generations.</p>
+
+        <a href="{% url 'get_started' %}" class="cta-button">Get Started Today</a>
+        <a href="https://apps.apple.com/ca/app/sighttrack/id6737868168" class="cta-button">Download App</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const galleryContainer = document.getElementById('galleryContainer');
+        const galleryScroll = document.getElementById('galleryScroll');
+        const scrollLeftBtn = document.getElementById('scrollLeft');
+        const scrollRightBtn = document.getElementById('scrollRight');
+        const scrollDotsContainer = document.getElementById('scrollDots');
+        const previewCards = document.querySelectorAll('.preview-card');
+
+        // Prevent lenis from interfering with gallery scroll
+        galleryContainer.setAttribute('data-lenis-prevent', '');
+
+        let currentIndex = 0;
+        const cardWidth = 240; // 200px + 2rem gap
+        const visibleCards = Math.floor(galleryContainer.clientWidth / cardWidth);
+        const maxIndex = Math.max(0, previewCards.length - visibleCards) + 1;
+
+        // Create scroll dots
+        function createDots() {
+            scrollDotsContainer.innerHTML = '';
+            const numDots = Math.min(previewCards.length, maxIndex + 1);
+
+            for (let i = 0; i <= maxIndex; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'scroll-dot';
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => scrollToIndex(i));
+                scrollDotsContainer.appendChild(dot);
+            }
+        }
+
+        // Update button states
+        function updateButtons() {
+            scrollLeftBtn.disabled = currentIndex <= 0;
+            scrollRightBtn.disabled = currentIndex >= maxIndex;
+
+            // Update dots
+            const dots = scrollDotsContainer.querySelectorAll('.scroll-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        // Scroll to specific index
+        function scrollToIndex(index) {
+            currentIndex = Math.max(0, Math.min(index, maxIndex));
+            const scrollPosition = currentIndex * cardWidth;
+
+            galleryContainer.scrollTo({
+                left: scrollPosition,
+                behavior: 'smooth'
+            });
+
+            updateButtons();
+        }
+
+        // Scroll left
+        scrollLeftBtn.addEventListener('click', function () {
+            scrollToIndex(currentIndex - 1);
+        });
+
+        // Scroll right
+        scrollRightBtn.addEventListener('click', function () {
+            scrollToIndex(currentIndex + 1);
+        });
+
+        // Handle manual scrolling
+        let scrollTimeout;
+        galleryContainer.addEventListener('scroll', function () {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const scrollLeft = galleryContainer.scrollLeft;
+                currentIndex = Math.round(scrollLeft / cardWidth);
+                updateButtons();
+            }, 100);
+        });
+
+        // Handle resize
+        window.addEventListener('resize', function () {
+            createDots();
+            updateButtons();
+        });
+
+        // Add touch/mouse wheel support
+        let isScrolling = false;
+
+        galleryContainer.addEventListener('wheel', function (e) {
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                // Horizontal scroll
+                e.preventDefault();
+                if (!isScrolling) {
+                    isScrolling = true;
+                    const direction = e.deltaX > 0 ? 1 : -1;
+                    scrollToIndex(currentIndex + direction);
+                    setTimeout(() => { isScrolling = false; }, 300);
+                }
+            }
+        }, { passive: false });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function (e) {
+            if (galleryContainer.matches(':hover')) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    scrollToIndex(currentIndex - 1);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    scrollToIndex(currentIndex + 1);
+                }
+            }
+        });
+
+        // Initialize
+        createDots();
+        updateButtons();
+    });
+</script>
+{% endblock %}
