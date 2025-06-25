@@ -530,8 +530,85 @@
             }
         }
 
+        // WebGL availability detection
+        function isWebGLAvailable() {
+            try {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+                if (!context) {
+                    return false;
+                }
+
+                // Additional check for required extensions
+                const extensions = context.getSupportedExtensions();
+                return extensions !== null;
+
+            } catch (error) {
+                console.log('WebGL detection error:', error);
+                return false;
+            }
+        }
+
+        // Static fallback when WebGL is not available
+        function setupStaticFallback() {
+            // Create a simple gradient background instead of 3D birds
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+                z-index: 1;
+            `;
+
+            // Add subtle animated elements for visual interest
+            const numDots = 50;
+            for (let i = 0; i < numDots; i++) {
+                const dot = document.createElement('div');
+                dot.style.cssText = `
+                    position: absolute;
+                    width: 2px;
+                    height: 2px;
+                    background: rgba(255, 255, 255, ${Math.random() * 0.5 + 0.1});
+                    border-radius: 50%;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    animation: twinkle ${2 + Math.random() * 3}s ease-in-out infinite alternate;
+                `;
+                fallbackDiv.appendChild(dot);
+            }
+
+            // Add CSS animation for twinkling
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes twinkle {
+                    from { opacity: 0.2; }
+                    to { opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            container.appendChild(fallbackDiv);
+
+            // Initialize scroll animations even without WebGL
+            initScrollAnimations();
+
+            // Add a subtle notice for the user (optional)
+            console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
+        }
+
         function init() {
             container = document.getElementById('canvas-container');
+
+            // Test WebGL availability before proceeding
+            if (!isWebGLAvailable()) {
+                console.log('WebGL not available, using static fallback');
+                setupStaticFallback();
+                return;
+            }
 
             camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
             camera.position.z = 1000;
@@ -563,16 +640,22 @@
             scene.add(mesh);
 
             // Renderer
-            renderer = new THREE.WebGPURenderer({
-                antialias: false,
-                forceWebGL: false,
-                powerPreference: "high-performance"
-            });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setAnimationLoop(animate);
-            renderer.toneMapping = THREE.NeutralToneMapping;
-            container.appendChild(renderer.domElement);
+            try {
+                renderer = new THREE.WebGPURenderer({
+                    antialias: false,
+                    forceWebGL: false,
+                    powerPreference: "high-performance"
+                });
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setAnimationLoop(animate);
+                renderer.toneMapping = THREE.NeutralToneMapping;
+                container.appendChild(renderer.domElement);
+            } catch (error) {
+                console.error('Renderer initialization failed:', error);
+                setupStaticFallback();
+                return;
+            }
 
             // Initialize arrays
             const positionArray = new Float32Array(BIRDS * 3);
@@ -799,6 +882,7 @@
         }
 
         function onWindowResize() {
+            if (!camera || !renderer) return;
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -843,9 +927,13 @@
             effectController.scrollVel.value = normalizedScrollVel;
             effectController.scrollPos.value = normalizedScrollPos;
 
-            renderer.compute(computeVelocity);
-            renderer.compute(computePosition);
-            renderer.render(scene, camera);
+            try {
+                renderer.compute(computeVelocity);
+                renderer.compute(computePosition);
+                renderer.render(scene, camera);
+            } catch (error) {
+                console.error('Error during rendering:', error);
+            }
 
             // Smoothly decay scroll velocity
             scrollVelocity *= 0.95;
