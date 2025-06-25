@@ -620,14 +620,26 @@
             pointer = new THREE.Vector2(0, 10); // Initialize pointer with default values
             raycaster = new THREE.Raycaster();
 
-            // Sky - Black and white gradient background
+            // Sky - Black center with navy blue edges and visible texture
             const geometry = new THREE.IcosahedronGeometry(1, 6);
             const material = new THREE.MeshBasicNodeMaterial({
                 colorNode: varying(
                     vec4(
-                        sub(0.1, positionLocal.y.mul(0.1)), // Red channel
-                        sub(0.1, positionLocal.y.mul(0.1)), // Green channel  
-                        sub(0.1, positionLocal.y.mul(0.1)), // Blue channel
+                        add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                            sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                                cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                            )
+                        ), // Red channel - visible crosshatch pattern
+                        add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                            sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                                cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                            )
+                        ), // Green channel - same as red to avoid green tint
+                        add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
+                            sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
+                                cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
+                            )
+                        ), // Blue channel - most visible pattern
                         1.0
                     )
                 ),
@@ -752,7 +764,21 @@
 
             birdMaterial.vertexNode = birdVertexTSL();
             birdMaterial.side = THREE.DoubleSide;
-            birdMaterial.colorNode = vec4(1.0, 1.0, 1.0, 1.0); // White birds
+            birdMaterial.transparent = true;
+            birdMaterial.colorNode = Fn(() => {
+                const reference = attribute('reference');
+                const phase = phaseStorage.element(reference);
+                const velocity = velocityStorage.element(reference);
+
+                // Subtle flapping opacity effect
+                const flapOpacity = sin(phase.mul(1.5)).mul(0.15).add(0.8); // 0.65 to 0.95 opacity
+
+                // Soft color variation based on movement
+                const speed = length(velocity);
+                const blueHint = speed.div(30.0).mul(0.1).add(0.95); // Subtle blue when moving fast
+
+                return vec4(blueHint, blueHint, 1.0, flapOpacity);
+            })(); // Fluid white-blue birds with flapping opacity
 
             const birdMesh = new THREE.Mesh(birdGeometry, birdMaterial);
             birdMesh.rotation.y = Math.PI / 2;
@@ -870,7 +896,7 @@
                 phaseStorage.element(instanceIndex).assign(modValue.mod(62.83));
             })().compute(BIRDS);
 
-            scene.add(birdMesh);
+            scene.add(birdMesh); // Commented out to see background clearly
 
             // Event listeners
             container.style.touchAction = 'none';

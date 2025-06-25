@@ -13,14 +13,21 @@
     body {
         margin: 0;
         padding: 0;
-        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+        background-color: #000;
         min-height: 100vh;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         color: white;
         overflow-x: hidden;
         overscroll-behavior: none;
-        background-attachment: fixed;
-        background-size: 100% 100%;
+    }
+
+    #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: 1;
     }
 
     .container {
@@ -29,6 +36,7 @@
         padding: 2rem;
         min-height: 100vh;
         position: relative;
+        z-index: 2;
     }
 
     .back-button {
@@ -345,25 +353,11 @@
     }
 
     .gallery-container {
-        overflow-x: auto;
-        overflow-y: hidden;
         padding: 2rem 0;
         margin: 2rem 0;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
         position: relative;
-        /* Prevent lenis from interfering with horizontal scroll */
-        overscroll-behavior-x: contain;
-        scroll-behavior: smooth;
-    }
-
-    .gallery-container::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Disable lenis on gallery container */
-    .gallery-container {
-        pointer-events: auto;
+        overflow: hidden;
+        /* Remove horizontal scrolling */
     }
 
     .gallery-scroll {
@@ -371,7 +365,7 @@
         gap: 2rem;
         padding: 0 2rem;
         width: max-content;
-        /* Ensure smooth scrolling */
+        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         will-change: transform;
     }
 
@@ -486,14 +480,7 @@
 
     /* Mobile optimizations */
     @media (max-width: 768px) {
-        .gallery-container {
-            /* Better touch scrolling on mobile */
-            -webkit-overflow-scrolling: touch;
-            scroll-snap-type: x mandatory;
-        }
-
         .preview-card {
-            scroll-snap-align: center;
             width: 160px;
         }
 
@@ -510,9 +497,156 @@
 {% endblock %}
 
 {% block content %}
+<div id="canvas-container"></div>
+
 <a href="{% url 'index' %}" class="back-button">
     <div class="back-arrow"></div>
 </a>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "/static/core/js/build/three.webgpu.js",
+            "three/webgpu": "/static/core/js/build/three.webgpu.js",
+            "three/tsl": "/static/core/js/build/three.tsl.js",
+            "three/addons/": "/static/core/js/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { varying, vec4, add, positionLocal, sin, cos } from 'three/tsl';
+
+    let container;
+    let camera, scene, renderer;
+
+    // WebGL availability detection
+    function isWebGLAvailable() {
+        try {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+            if (!context) {
+                return false;
+            }
+
+            const extensions = context.getSupportedExtensions();
+            return extensions !== null;
+
+        } catch (error) {
+            console.log('WebGL detection error:', error);
+            return false;
+        }
+    }
+
+    // Static fallback when WebGL is not available
+    function setupStaticFallback() {
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+            z-index: 1;
+        `;
+        container.appendChild(fallbackDiv);
+
+        console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
+    }
+
+    function init() {
+        container = document.getElementById('canvas-container');
+
+        // Test WebGL availability before proceeding
+        if (!isWebGLAvailable()) {
+            console.log('WebGL not available, using static fallback');
+            setupStaticFallback();
+            return;
+        }
+
+        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+        camera.position.z = 1000;
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x000000, 700, 3000);
+
+        // Sky - Black center with navy blue edges and visible texture
+        const geometry = new THREE.IcosahedronGeometry(1, 6);
+        const material = new THREE.MeshBasicNodeMaterial({
+            colorNode: varying(
+                vec4(
+                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                        )
+                    ), // Red channel - visible crosshatch pattern
+                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                        )
+                    ), // Green channel - same as red to avoid green tint
+                    add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
+                        sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
+                            cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
+                        )
+                    ), // Blue channel - most visible pattern
+                    1.0
+                )
+            ),
+            side: THREE.BackSide
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.z = 0.75;
+        mesh.scale.setScalar(1200);
+        scene.add(mesh);
+
+        // Renderer
+        try {
+            renderer = new THREE.WebGPURenderer({
+                antialias: false,
+                forceWebGL: false,
+                powerPreference: "high-performance"
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setAnimationLoop(animate);
+            renderer.toneMapping = THREE.NeutralToneMapping;
+            container.appendChild(renderer.domElement);
+        } catch (error) {
+            console.error('Renderer initialization failed:', error);
+            setupStaticFallback();
+            return;
+        }
+
+        // Event listeners
+        window.addEventListener('resize', onWindowResize);
+    }
+
+    function onWindowResize() {
+        if (!camera || !renderer) return;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+        render();
+    }
+
+    function render() {
+        try {
+            renderer.render(scene, camera);
+        } catch (error) {
+            console.error('Error during rendering:', error);
+        }
+    }
+
+    init();
+</script>
 
 <div class="container">
     <div class="content-section hero-section">
@@ -683,9 +817,6 @@
         const scrollDotsContainer = document.getElementById('scrollDots');
         const previewCards = document.querySelectorAll('.preview-card');
 
-        // Prevent lenis from interfering with gallery scroll
-        galleryContainer.setAttribute('data-lenis-prevent', '');
-
         let currentIndex = 0;
         const cardWidth = 240; // 200px + 2rem gap
         const visibleCards = Math.floor(galleryContainer.clientWidth / cardWidth);
@@ -694,7 +825,7 @@
         // Create scroll dots
         function createDots() {
             scrollDotsContainer.innerHTML = '';
-            const numDots = Math.min(previewCards.length, maxIndex + 1);
+            const numDots = maxIndex + 1;
 
             for (let i = 0; i <= maxIndex; i++) {
                 const dot = document.createElement('div');
@@ -705,77 +836,38 @@
             }
         }
 
-        // Update button states
-        function updateButtons() {
+        // Update button states and dots
+        function updateControls() {
             scrollLeftBtn.disabled = currentIndex <= 0;
             scrollRightBtn.disabled = currentIndex >= maxIndex;
 
-            // Update dots
             const dots = scrollDotsContainer.querySelectorAll('.scroll-dot');
             dots.forEach((dot, index) => {
                 dot.classList.toggle('active', index === currentIndex);
             });
         }
 
-        // Scroll to specific index
+        // Scroll to specific index using CSS transform
         function scrollToIndex(index) {
             currentIndex = Math.max(0, Math.min(index, maxIndex));
-            const scrollPosition = currentIndex * cardWidth;
+            const translateX = -currentIndex * cardWidth;
 
-            galleryContainer.scrollTo({
-                left: scrollPosition,
-                behavior: 'smooth'
-            });
-
-            updateButtons();
+            galleryScroll.style.transform = `translateX(${translateX}px)`;
+            updateControls();
         }
 
-        // Scroll left
+        // Button event listeners
         scrollLeftBtn.addEventListener('click', function () {
             scrollToIndex(currentIndex - 1);
         });
 
-        // Scroll right
         scrollRightBtn.addEventListener('click', function () {
             scrollToIndex(currentIndex + 1);
         });
 
-        // Handle manual scrolling
-        let scrollTimeout;
-        galleryContainer.addEventListener('scroll', function () {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                const scrollLeft = galleryContainer.scrollLeft;
-                currentIndex = Math.round(scrollLeft / cardWidth);
-                updateButtons();
-            }, 100);
-        });
-
-        // Handle resize
-        window.addEventListener('resize', function () {
-            createDots();
-            updateButtons();
-        });
-
-        // Add touch/mouse wheel support
-        let isScrolling = false;
-
-        galleryContainer.addEventListener('wheel', function (e) {
-            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-                // Horizontal scroll
-                e.preventDefault();
-                if (!isScrolling) {
-                    isScrolling = true;
-                    const direction = e.deltaX > 0 ? 1 : -1;
-                    scrollToIndex(currentIndex + direction);
-                    setTimeout(() => { isScrolling = false; }, 300);
-                }
-            }
-        }, { passive: false });
-
-        // Keyboard navigation
+        // Keyboard navigation (only when gallery is focused)
         document.addEventListener('keydown', function (e) {
-            if (galleryContainer.matches(':hover')) {
+            if (document.activeElement.closest('.gallery-section')) {
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
                     scrollToIndex(currentIndex - 1);
@@ -786,9 +878,16 @@
             }
         });
 
+        // Handle resize
+        window.addEventListener('resize', function () {
+            createDots();
+            updateControls();
+            scrollToIndex(0); // Reset to first item on resize
+        });
+
         // Initialize
         createDots();
-        updateButtons();
+        updateControls();
     });
 </script>
 {% endblock %}

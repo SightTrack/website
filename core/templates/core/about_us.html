@@ -13,14 +13,21 @@
     body {
         margin: 0;
         padding: 0;
-        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+        background-color: #000;
         min-height: 100vh;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         color: white;
         overflow-x: hidden;
         overscroll-behavior: none;
-        background-attachment: fixed;
-        background-size: 100% 100%;
+    }
+
+    #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: 1;
     }
 
     .container {
@@ -29,6 +36,7 @@
         padding: 2rem;
         min-height: 100vh;
         position: relative;
+        z-index: 2;
     }
 
     .back-button {
@@ -418,9 +426,156 @@
 {% endblock %}
 
 {% block content %}
+<div id="canvas-container"></div>
+
 <a href="{% url 'index' %}" class="back-button">
     <div class="back-arrow"></div>
 </a>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "/static/core/js/build/three.webgpu.js",
+            "three/webgpu": "/static/core/js/build/three.webgpu.js",
+            "three/tsl": "/static/core/js/build/three.tsl.js",
+            "three/addons/": "/static/core/js/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { varying, vec4, add, positionLocal, sin, cos } from 'three/tsl';
+
+    let container;
+    let camera, scene, renderer;
+
+    // WebGL availability detection
+    function isWebGLAvailable() {
+        try {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+            if (!context) {
+                return false;
+            }
+
+            const extensions = context.getSupportedExtensions();
+            return extensions !== null;
+
+        } catch (error) {
+            console.log('WebGL detection error:', error);
+            return false;
+        }
+    }
+
+    // Static fallback when WebGL is not available
+    function setupStaticFallback() {
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+            z-index: 1;
+        `;
+        container.appendChild(fallbackDiv);
+
+        console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
+    }
+
+    function init() {
+        container = document.getElementById('canvas-container');
+
+        // Test WebGL availability before proceeding
+        if (!isWebGLAvailable()) {
+            console.log('WebGL not available, using static fallback');
+            setupStaticFallback();
+            return;
+        }
+
+        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+        camera.position.z = 1000;
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x000000, 700, 3000);
+
+        // Sky - Black center with navy blue edges and visible texture
+        const geometry = new THREE.IcosahedronGeometry(1, 6);
+        const material = new THREE.MeshBasicNodeMaterial({
+            colorNode: varying(
+                vec4(
+                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                        )
+                    ), // Red channel - visible crosshatch pattern
+                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                        )
+                    ), // Green channel - same as red to avoid green tint
+                    add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
+                        sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
+                            cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
+                        )
+                    ), // Blue channel - most visible pattern
+                    1.0
+                )
+            ),
+            side: THREE.BackSide
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.z = 0.75;
+        mesh.scale.setScalar(1200);
+        scene.add(mesh);
+
+        // Renderer
+        try {
+            renderer = new THREE.WebGPURenderer({
+                antialias: false,
+                forceWebGL: false,
+                powerPreference: "high-performance"
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setAnimationLoop(animate);
+            renderer.toneMapping = THREE.NeutralToneMapping;
+            container.appendChild(renderer.domElement);
+        } catch (error) {
+            console.error('Renderer initialization failed:', error);
+            setupStaticFallback();
+            return;
+        }
+
+        // Event listeners
+        window.addEventListener('resize', onWindowResize);
+    }
+
+    function onWindowResize() {
+        if (!camera || !renderer) return;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+        render();
+    }
+
+    function render() {
+        try {
+            renderer.render(scene, camera);
+        } catch (error) {
+            console.error('Error during rendering:', error);
+        }
+    }
+
+    init();
+</script>
 
 <div class="container">
     <div class="hero-section">
