@@ -15,6 +15,9 @@ def index(request):
 def get_started(request):
     return render(request, "core/get_started.html", {})
 
+def donate(request):
+    return render(request, "core/donate.html", {})
+
 def learn_more(request):
     return render(request, "core/learn_more.html", {})
 

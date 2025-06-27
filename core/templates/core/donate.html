@@ -1,0 +1,1003 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Donate - SightTrack{% endblock %}
+
+{% block extra_head %}
+<style>
+    html {
+        overscroll-behavior: none;
+        background: #000000;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #000;
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: white;
+        overflow-x: hidden;
+        overscroll-behavior: none;
+    }
+
+    #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: 1;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 2;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 2rem;
+        left: 2rem;
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        text-decoration: none;
+        color: white;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+    }
+
+    .back-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .back-button:hover::before {
+        opacity: 1;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .back-arrow {
+        width: 24px;
+        height: 24px;
+        position: relative;
+    }
+
+    .back-arrow::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(45deg);
+        transform-origin: left center;
+    }
+
+    .back-arrow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        transform-origin: left center;
+    }
+
+    .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 4rem 0;
+    }
+
+    .content-card {
+        background: rgba(255, 255, 255, 0.01);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .content-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        margin: 0 0 1.5rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    h2 {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        margin: 0 0 1rem 0;
+        color: #ffffff;
+    }
+
+    p {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        line-height: 1.6;
+        color: #cccccc;
+        margin: 0 0 1.5rem 0;
+        font-weight: 300;
+    }
+
+    .highlight {
+        color: #ffffff;
+        font-weight: 400;
+    }
+
+    .donate-widget-container {
+        margin: 2rem 0;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .donate-widget-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .gfm-embed {
+        position: relative;
+        z-index: 2;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .custom-donate-button {
+        display: block;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-decoration: none;
+        color: white;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        text-align: center;
+        cursor: pointer;
+        width: 100%;
+        max-width: 500px;
+        margin: 2rem auto;
+    }
+
+    .custom-donate-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        opacity: 0;
+        transition: all 0.4s ease;
+        border-radius: 16px;
+    }
+
+    .custom-donate-button:hover::before {
+        opacity: 1;
+    }
+
+    .custom-donate-button:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .donate-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .donate-content h3 {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        margin: 0 0 1rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .donate-content p {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        line-height: 1.5;
+        color: #cccccc;
+        margin: 0 0 2rem 0;
+        font-weight: 300;
+    }
+
+    .donate-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        min-width: 160px;
+    }
+
+    .donate-action::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 12px;
+    }
+
+    .custom-donate-button:hover .donate-action {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .custom-donate-button:hover .donate-action::before {
+        opacity: 1;
+    }
+
+    .donate-meta {
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #999;
+        font-weight: 300;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .content {
+            padding: 2rem 0;
+        }
+
+        .content-card {
+            padding: 2rem;
+        }
+
+        .donate-widget-container {
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .back-button {
+            top: 1.5rem;
+            left: 1.5rem;
+            width: 50px;
+            height: 50px;
+        }
+    }
+
+    .donation-slider-container {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        margin: 2rem auto;
+        max-width: 500px;
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        text-align: center;
+    }
+
+    .donation-slider-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .slider-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .slider-title {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        margin: 0 0 1rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .slider-description {
+        font-size: clamp(1rem, 2.5vw, 1.1rem);
+        line-height: 1.5;
+        color: #cccccc;
+        margin: 0 0 2.5rem 0;
+        font-weight: 300;
+    }
+
+    .donation-amount-display {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 300;
+        color: #ffffff;
+        margin: 1rem 0 2rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .slider-wrapper {
+        position: relative;
+        margin: 2rem 0;
+        padding: 1rem 0;
+    }
+
+    .donation-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 12px;
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.05) 0%,
+                rgba(255, 255, 255, 0.02) 25%,
+                rgba(255, 255, 255, 0.08) 50%,
+                rgba(255, 255, 255, 0.02) 75%,
+                rgba(255, 255, 255, 0.05) 100%);
+        border-radius: 50px;
+        outline: none;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(25px);
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 4px 20px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .donation-slider::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%);
+        border-radius: 50px;
+        opacity: 0;
+        transition: all 0.6s ease;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+
+        0%,
+        100% {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        50% {
+            opacity: 0.3;
+            transform: translateX(100%);
+        }
+    }
+
+    .donation-slider:hover {
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.08) 0%,
+                rgba(255, 255, 255, 0.04) 25%,
+                rgba(255, 255, 255, 0.12) 50%,
+                rgba(255, 255, 255, 0.04) 75%,
+                rgba(255, 255, 255, 0.08) 100%);
+        border-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(30px);
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            inset 0 2px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.1),
+            0 0 0 2px rgba(255, 255, 255, 0.1),
+            0 0 30px rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .donation-slider:hover::before {
+        opacity: 0.5;
+    }
+
+    .donation-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.7) 25%,
+                rgba(255, 255, 255, 0.8) 50%,
+                rgba(255, 255, 255, 0.6) 75%,
+                rgba(255, 255, 255, 0.85) 100%);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow:
+            0 6px 20px rgba(0, 0, 0, 0.4),
+            inset 0 2px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.1),
+            0 0 0 3px rgba(255, 255, 255, 0.1),
+            0 0 20px rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(15px);
+        position: relative;
+    }
+
+    .donation-slider::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.7) 25%,
+                rgba(255, 255, 255, 0.8) 50%,
+                rgba(255, 255, 255, 0.6) 75%,
+                rgba(255, 255, 255, 0.85) 100%);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow:
+            0 6px 20px rgba(0, 0, 0, 0.4),
+            inset 0 2px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.1),
+            0 0 0 3px rgba(255, 255, 255, 0.1),
+            0 0 20px rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        backdrop-filter: blur(15px);
+    }
+
+    .donation-slider:hover::-webkit-slider-thumb {
+        transform: scale(1.15);
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.8) 25%,
+                rgba(255, 255, 255, 0.9) 50%,
+                rgba(255, 255, 255, 0.7) 75%,
+                rgba(255, 255, 255, 0.9) 100%);
+        box-shadow:
+            0 10px 35px rgba(0, 0, 0, 0.5),
+            inset 0 3px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -3px 0 rgba(0, 0, 0, 0.1),
+            0 0 0 4px rgba(255, 255, 255, 0.15),
+            0 0 40px rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .donation-slider:hover::-moz-range-thumb {
+        transform: scale(1.15);
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.8) 25%,
+                rgba(255, 255, 255, 0.9) 50%,
+                rgba(255, 255, 255, 0.7) 75%,
+                rgba(255, 255, 255, 0.9) 100%);
+        box-shadow:
+            0 10px 35px rgba(0, 0, 0, 0.5),
+            inset 0 3px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -3px 0 rgba(0, 0, 0, 0.1),
+            0 0 0 4px rgba(255, 255, 255, 0.15),
+            0 0 40px rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .donation-slider:active::-webkit-slider-thumb {
+        transform: scale(0.95);
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0.9) 50%,
+                rgba(255, 255, 255, 0.7) 100%);
+        box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+            0 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+
+    .donation-slider:active::-moz-range-thumb {
+        transform: scale(0.95);
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0.9) 50%,
+                rgba(255, 255, 255, 0.7) 100%);
+        box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+            0 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+
+    .slider-labels {
+        display: flex;
+        position: relative;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: #999;
+        font-weight: 300;
+        height: 20px;
+    }
+
+    .slider-labels .label {
+        position: absolute;
+        transform: translateX(-50%);
+        white-space: nowrap;
+    }
+
+    .slider-labels .label:first-child {
+        left: 2.8%;
+        /* Account for half thumb width */
+        transform: translateX(-50%);
+    }
+
+    .slider-labels .label:nth-child(2) {
+        left: 22.4%;
+        /* (100/500 * 94.4%) + 2.8% */
+    }
+
+    .slider-labels .label:nth-child(3) {
+        left: 50%;
+        /* Back to original position that was working */
+    }
+
+    .slider-labels .label:last-child {
+        left: 100%;
+        /* Move to actual end of slider */
+        transform: translateX(-100%);
+    }
+
+    .custom-donate-button {
+        display: none;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-decoration: none;
+        color: white;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        text-align: center;
+        cursor: pointer;
+        width: 100%;
+        max-width: 500px;
+        margin: 2rem auto 0 auto;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .custom-donate-button.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .thank-you-message {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="canvas-container"></div>
+
+<a href="{% url 'index' %}" class="back-button">
+    <div class="back-arrow"></div>
+</a>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "/static/core/js/build/three.webgpu.js",
+            "three/webgpu": "/static/core/js/build/three.webgpu.js",
+            "three/tsl": "/static/core/js/build/three.tsl.js",
+            "three/addons/": "/static/core/js/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { varying, vec4, add, positionLocal, sin, cos } from 'three/tsl';
+
+    let container;
+    let camera, scene, renderer;
+
+    // WebGL availability detection
+    function isWebGLAvailable() {
+        try {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+            if (!context) {
+                return false;
+            }
+
+            const extensions = context.getSupportedExtensions();
+            return extensions !== null;
+
+        } catch (error) {
+            console.log('WebGL detection error:', error);
+            return false;
+        }
+    }
+
+    // Static fallback when WebGL is not available
+    function setupStaticFallback() {
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+            z-index: 1;
+        `;
+        container.appendChild(fallbackDiv);
+
+        console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
+    }
+
+    function init() {
+        container = document.getElementById('canvas-container');
+
+        // Test WebGL availability before proceeding
+        if (!isWebGLAvailable()) {
+            console.log('WebGL not available, using static fallback');
+            setupStaticFallback();
+            return;
+        }
+
+        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+        camera.position.z = 1000;
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x000000, 700, 3000);
+
+        // Sky - Black center with navy blue edges and visible texture
+        const geometry = new THREE.IcosahedronGeometry(1, 6);
+        const material = new THREE.MeshBasicNodeMaterial({
+            colorNode: varying(
+                vec4(
+                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                        )
+                    ), // Red channel - visible crosshatch pattern
+                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
+                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
+                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
+                        )
+                    ), // Green channel - same as red to avoid green tint
+                    add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
+                        sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
+                            cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
+                        )
+                    ), // Blue channel - most visible pattern
+                    1.0
+                )
+            ),
+            side: THREE.BackSide
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.z = 0.75;
+        mesh.scale.setScalar(1200);
+        scene.add(mesh);
+
+        // Renderer
+        try {
+            renderer = new THREE.WebGPURenderer({
+                antialias: false,
+                forceWebGL: false,
+                powerPreference: "high-performance"
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setAnimationLoop(animate);
+            renderer.toneMapping = THREE.NeutralToneMapping;
+            container.appendChild(renderer.domElement);
+        } catch (error) {
+            console.error('Renderer initialization failed:', error);
+            setupStaticFallback();
+            return;
+        }
+
+        // Event listeners
+        window.addEventListener('resize', onWindowResize);
+    }
+
+    function onWindowResize() {
+        if (!camera || !renderer) return;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+        render();
+    }
+
+    function render() {
+        try {
+            renderer.render(scene, camera);
+        } catch (error) {
+            console.error('Error during rendering:', error);
+        }
+    }
+
+    init();
+</script>
+
+<div class="container">
+    <div class="content">
+        <div class="content-card">
+            <h1>Support SightTrack</h1>
+            <h2>Help us protect wildlife through citizen science</h2>
+            <p>Your donation helps us maintain our platform, expand our reach, and support conservation efforts
+                worldwide. <span class="highlight">Every contribution makes a difference</span> in protecting
+                biodiversity and building a community of wildlife advocates.</p>
+
+            <a href="https://www.gofundme.com/f/donate-to-sighttrack" target="_blank" rel="noopener noreferrer"
+                class="custom-donate-button">
+                <div class="donate-content">
+                    <h3>Support Our Mission</h3>
+                    <p>Help us build technology for wildlife conservation and expand our impact worldwide</p>
+                    <span class="donate-action">Donate on GoFundMe</span>
+                    <div class="donate-meta">Your contribution directly supports platform development and conservation
+                        research</div>
+                </div>
+            </a>
+
+            <div class="donation-slider-container">
+                <div class="slider-content">
+                    <h3 class="slider-title">How much would you donate to SightTrack?</h3>
+                    <p class="slider-description">Move the slider to see how your contribution could help wildlife
+                        conservation</p>
+
+                    <div class="donation-amount-display" id="donationAmount">$0</div>
+
+                    <div class="slider-wrapper">
+                        <input type="range" min="0" max="500" value="0" class="donation-slider" id="donationSlider">
+                        <div class="slider-labels">
+                            <span class="label">$0</span>
+                            <span class="label">$100</span>
+                            <span class="label">$250</span>
+                            <span class="label">$500+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="https://www.gofundme.com/f/donate-to-sighttrack" target="_blank" rel="noopener noreferrer"
+                class="custom-donate-button" id="donateButton">
+                <div class="donate-content">
+                    <h3>Support Our Mission</h3>
+                    <p>Help us build technology for wildlife conservation and expand our impact worldwide</p>
+                    <span class="donate-action">Donate on GoFundMe</span>
+                    <div class="donate-meta">Your contribution directly supports platform development and conservation
+                        research</div>
+                </div>
+            </a>
+
+            <p class="thank-you-message">Thank you for supporting wildlife conservation and helping us build a better
+                future for all species on
+                Earth.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Donation slider functionality
+    const slider = document.getElementById('donationSlider');
+    const amountDisplay = document.getElementById('donationAmount');
+    const donateButton = document.getElementById('donateButton');
+
+    function updateSliderDisplay(value) {
+        // Update amount display
+        if (value === 500) {
+            amountDisplay.textContent = '$500+';
+        } else {
+            amountDisplay.textContent = '$' + value;
+        }
+
+        // Show/hide donate button with immediate effect
+        if (value > 0) {
+            donateButton.style.display = 'block';
+            // Force reflow
+            donateButton.offsetHeight;
+            donateButton.classList.add('show');
+        } else {
+            donateButton.classList.remove('show');
+            // Use timeout to allow transition to complete before hiding
+            setTimeout(() => {
+                if (!donateButton.classList.contains('show')) {
+                    donateButton.style.display = 'none';
+                }
+            }, 400);
+        }
+
+        // Add visual feedback for amount display
+        if (value > 0) {
+            amountDisplay.style.color = '#ffffff';
+            amountDisplay.style.textShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
+        } else {
+            amountDisplay.style.color = '#cccccc';
+            amountDisplay.style.textShadow = 'none';
+        }
+    }
+
+    // Initialize slider state on page load
+    function initializeSlider() {
+        const currentValue = parseInt(slider.value);
+        updateSliderDisplay(currentValue);
+    }
+
+    // Handle slider input events
+    slider.addEventListener('input', function () {
+        const value = parseInt(this.value);
+        updateSliderDisplay(value);
+    });
+
+    // Handle slider change events (for better browser compatibility)
+    slider.addEventListener('change', function () {
+        const value = parseInt(this.value);
+        updateSliderDisplay(value);
+    });
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initializeSlider);
+
+    // Also initialize immediately in case DOM is already loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeSlider);
+    } else {
+        initializeSlider();
+    }
+
+    // Handle page visibility changes (when user comes back to tab)
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) {
+            // Page became visible, check slider state
+            setTimeout(initializeSlider, 100);
+        }
+    });
+
+    // Handle page focus (when user clicks back into window)
+    window.addEventListener('focus', function () {
+        setTimeout(initializeSlider, 100);
+    });
+</script>
+{% endblock %}
