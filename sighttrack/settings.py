@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-k5*5syt$1a-)b_q!b1s^z=lg7kj@xf25tsf04984=iz4cpydj_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['sighttrack.org', 'www.sighttrack.org', 'localhost',]
 
 
 # Application definition
