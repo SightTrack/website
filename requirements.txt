@@ -1,0 +1,38 @@
+# Core Django framework
+Django==5.2.3
+
+# reCAPTCHA integration for forms
+django-recaptcha==4.0.0
+
+# Additional useful packages for Django projects
+# Uncomment the ones you need:
+
+# For production deployment
+# gunicorn==21.2.0
+# whitenoise==6.6.0
+
+# For environment variables management
+# python-decouple==3.8
+
+# For PostgreSQL database (if switching from SQLite)
+# psycopg2-binary==2.9.9
+
+# For enhanced admin interface
+# django-admin-interface==0.28.6
+
+# For API development
+# djangorestframework==3.14.0
+
+# For CORS handling (if building APIs)
+# django-cors-headers==4.3.1
+
+# For development and debugging
+# django-debug-toolbar==4.2.0
+
+# For testing
+# pytest-django==4.8.0
+# factory-boy==3.3.0
+
+# For static file management in production
+# django-storages==1.14.2
+# boto3==1.34.0  # For AWS S3 storage
