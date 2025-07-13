@@ -1,0 +1,917 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}For Researchers - SightTrack{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'core/css/termynal.css' %}">
+<style>
+    html {
+        background: #000000;
+    }
+
+    body {  
+        margin: 0;
+        padding: 0;
+        background-color: #000000;
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: white;
+        overflow-x: hidden;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 4rem 4rem 2rem;
+        min-height: auto;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 2rem;
+        left: 2rem;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: white;
+        z-index: 1000;
+    }
+
+    .back-button:hover .back-arrow::before,
+    .back-button:hover .back-arrow::after {
+        background: #ccc;
+    }
+
+    .back-arrow {
+        width: 20px;
+        height: 20px;
+        position: relative;
+    }
+
+    .back-arrow::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 10px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(45deg);
+        transform-origin: left center;
+    }
+
+    .back-arrow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 10px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        transform-origin: left center;
+    }
+
+    .hero-section {
+        text-align: center;
+        padding: 3rem 0 4rem;
+        margin-bottom: 4rem;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        margin: 0 0 1.5rem 0;
+        color: #ffffff;
+    }
+
+    .subtitle {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        line-height: 1.6;
+        color: #cccccc;
+        margin: 0;
+        font-weight: 300;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    h2 {
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 300;
+        letter-spacing: -0.01em;
+        margin: 4rem 0 2rem 0;
+        color: #ffffff;
+    }
+
+    h3 {
+        font-size: clamp(1.3rem, 3vw, 1.8rem);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        margin: 3rem 0 1.5rem 0;
+        color: #ffffff;
+    }
+
+    h4 {
+        font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+        font-weight: 500;
+        margin: 2rem 0 1rem 0;
+        color: #ffffff;
+    }
+
+    p {
+        font-size: clamp(0.9rem, 2vw, 1rem);
+        line-height: 1.7;
+        color: #cccccc;
+        margin: 1.5rem 0;
+        font-weight: 300;
+    }
+
+    .section {
+        margin: 4rem 0;
+    }
+
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .feature-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        border-color: #555;
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: white;
+    }
+
+    .feature-icon i {
+        font-size: 1.5rem;
+    }
+
+    .diagram-container {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 3rem 0;
+        text-align: center;
+    }
+
+    .sampling-diagram {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 3rem;
+        margin: 2rem 0;
+    }
+
+    .quadrant-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 60px);
+        grid-template-rows: repeat(4, 60px);
+        gap: 8px;
+        margin: 1rem;
+    }
+
+    .quadrant-cell {
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .quadrant-cell.active {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .transect-line {
+        position: relative;
+        width: 300px;
+        height: 100px;
+        background: linear-gradient(to right, #333 0%, #333 48%, #4CAF50 48%, #4CAF50 52%, #333 52%, #333 100%);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 1rem;
+    }
+
+    .transect-points {
+        position: absolute;
+        top: -10px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px;
+    }
+
+    .transect-point {
+        width: 8px;
+        height: 8px;
+        background: #4CAF50;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+
+    .methodology-list {
+        list-style: none;
+        padding: 0;
+        margin: 2rem 0;
+    }
+
+    .methodology-list li {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        position: relative;
+        padding-left: 3rem;
+    }
+
+    .methodology-list li::before {
+        content: '✓';
+        position: absolute;
+        left: 1rem;
+        top: 1.5rem;
+        color: #4CAF50;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #4CAF50;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #cccccc;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .code-block {
+        background: #0f0f0f;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.9rem;
+        color: #e0e0e0;
+        overflow-x: auto;
+    }
+
+    .highlight {
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(69, 160, 73, 0.05) 100%);
+        border-left: 4px solid #4CAF50;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        margin: 4rem 0;
+    }
+
+    .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin: 1rem 0.5rem;
+    }
+
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+    }
+
+    .protocol-flow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+
+    .protocol-step {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        flex: 1;
+        min-width: 150px;
+        position: relative;
+    }
+
+    .protocol-step:not(:last-child)::after {
+        content: '→';
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #4CAF50;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .step-number {
+        background: #4CAF50;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-weight: 600;
+    }
+
+    /* Additional styles for better layout */
+    .methodology-comparison {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .method-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .method-card:hover {
+        border-color: #555;
+        transform: translateY(-5px);
+    }
+
+    .method-pros-cons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .pros h5, .cons h5 {
+        color: #4CAF50;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .cons h5 {
+        color: #ff9800;
+    }
+
+    .enhanced-diagram {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 3rem 0;
+    }
+
+    .research-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .technical-specs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .spec-category {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .spec-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+
+    .spec-list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #333;
+    }
+
+    .spec-list li:last-child {
+        border-bottom: none;
+    }
+
+    .spec-value {
+        color: #4CAF50;
+        font-weight: 500;
+    }
+
+    .research-quality-indicators {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .quality-indicator {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .quality-score {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #4CAF50;
+        margin-bottom: 0.5rem;
+    }
+
+    .accuracy-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .accuracy-bar {
+        flex: 1;
+        height: 8px;
+        background: #333;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .accuracy-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        width: var(--accuracy, 0%);
+        transition: width 2s ease-out;
+    }
+
+    .workflow-timeline {
+        margin: 3rem 0;
+    }
+
+    .timeline-item {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+        position: relative;
+        border-left: 4px solid #4CAF50;
+    }
+
+    .interactive-demo {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 3rem 0;
+    }
+
+    .demo-controls {
+        display: flex;
+        gap: 1rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .demo-button {
+        background: linear-gradient(135deg, #333 0%, #222 100%);
+        color: white;
+        border: 1px solid #444;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .demo-button:hover {
+        background: linear-gradient(135deg, #444 0%, #333 100%);
+        border-color: #555;
+    }
+
+    .demo-button.active {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        border-color: #4CAF50;
+    }
+
+    .validation-step {
+        margin: 2rem 0;
+    }
+
+    .certification-badges {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .certification-badge {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .certification-badge:hover {
+        border-color: #4CAF50;
+        transform: translateY(-5px);
+    }
+
+    .badge-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #4CAF50;
+    }
+
+    /* Animated List Styles */
+    .animated-list {
+        margin: 3rem 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* Methodology Info Styles */
+    .centered-formula {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        text-align: center;
+        padding: 1rem 0;
+        margin: 2rem 0;
+        color: #e0e0e0;
+        font-size: 1rem;
+    }
+
+    .centered-standard {
+        text-align: center;
+        padding: 1rem 0;
+        margin: 1rem 0;
+        color: #cccccc;
+        font-size: 1rem;
+    }
+
+    .centered-formula strong,
+    .centered-standard strong {
+        color: #4CAF50;
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    /* Research Section Styles */
+    .section h3 {
+        font-size: clamp(1.2rem, 2.8vw, 1.6rem);
+        font-weight: 400;
+        color: #ffffff;
+        margin: 3rem 0 1.5rem 0;
+        border-bottom: 1px solid #333;
+        padding-bottom: 0.5rem;
+    }
+
+    .section p strong {
+        color: #4CAF50;
+    }
+
+    /* Terminal Animation Styles - Remove Background */
+    #termynal {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    #termynal .termynal {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    /* Hide terminal window decorations */
+    #termynal .termynal-header,
+    #termynal .header,
+    #termynal .terminal-header,
+    #termynal [data-termynal-header],
+    .termynal-header,
+    .header,
+    .terminal-header {
+        display: none !important;
+    }
+
+    /* Hide title bar and window controls */
+    #termynal .title,
+    #termynal .window-title,
+    #termynal .terminal-title,
+    #termynal .controls,
+    #termynal .window-controls,
+    #termynal .terminal-controls,
+    .title,
+    .window-title,
+    .terminal-title,
+    .controls,
+    .window-controls,
+    .terminal-controls {
+        display: none !important;
+    }
+
+    /* Hide any pseudo-elements that might create window decorations */
+    #termynal::before,
+    #termynal::after,
+    #termynal .termynal::before,
+    #termynal .termynal::after {
+        display: none !important;
+    }
+
+    #termynal [data-ty] {
+        background: transparent !important;
+        color: #e0e0e0 !important;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.95rem;
+        margin: 0.5rem 0;
+    }
+
+    #termynal [data-ty="input"]::before {
+        content: "$ ";
+        color: #4CAF50;
+        font-weight: bold;
+    }
+
+    #termynal [data-ty="progress"] {
+        color: #4CAF50 !important;
+    }
+
+    .list-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 0;
+        opacity: 0;
+        transform: translateX(-30px);
+        animation: slideInLeft 0.6s ease-out forwards;
+        font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    .list-bullet {
+        color: #4CAF50;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .list-text {
+        transition: color 0.3s ease;
+    }
+
+    .list-item:hover .list-bullet {
+        transform: scale(1.2);
+    }
+
+    .list-item:hover .list-text {
+        color: #4CAF50;
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Animations */
+    @keyframes fillBar {
+        from { width: 0%; }
+        to { width: var(--accuracy); }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 2rem 1rem;
+        }
+        
+        .sampling-diagram {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .transect-line {
+            width: 250px;
+        }
+        
+        .protocol-step:not(:last-child)::after {
+            content: '↓';
+            right: 50%;
+            bottom: -20px;
+            top: auto;
+            transform: translateX(50%);
+        }
+
+        .methodology-comparison {
+            grid-template-columns: 1fr;
+        }
+
+        .method-pros-cons {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .technical-specs-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .demo-controls {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content">
+    <a href="{% url 'index' %}" class="back-button">
+        <div class="back-arrow"></div>
+    </a>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1>For Researchers</h1>
+            <p class="subtitle">
+                Professional-grade biodiversity monitoring with rigorous scientific methodologies, 
+                standardized protocols, and comprehensive data analysis for ecological research.
+            </p>
+        </div>
+
+        <!-- Professional Standards Section -->
+        <div class="section">
+            <div class="animated-list">
+                <div class="list-item" style="animation-delay: 0.1s;">
+                    <span class="list-text">ISO 27001 & SOC 2</span>
+                </div>
+                <div class="list-item" style="animation-delay: 0.2s;">
+                    <span class="list-text">GBIF & Darwin Core</span>
+                </div>
+                <div class="list-item" style="animation-delay: 0.3s;">
+                    <span class="list-text">Research Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quadrat Sampling -->
+        <div class="section">
+            <h2>Quadrat Sampling</h2>
+            <p>Fixed-area plots for vegetation and sessile organism studies with automated sample size calculations.</p>
+            
+            <div class="centered-formula">
+                <strong>Sample Size Calculation:</strong> n = (Z²σ²) / E²
+            </div>
+            <div class="centered-standard">
+                <strong>Optimal Spacing:</strong> 50m systematic grid
+            </div>
+        </div>
+
+        <!-- Transect Sampling -->
+        <div class="section">
+            <h2>Transect Sampling</h2>
+            <p>Linear sampling for gradient analysis and large-scale biodiversity assessment.</p>
+            
+            <div class="centered-formula">
+                <strong>Density Estimation:</strong> D = n / (2 × L × ESW)
+            </div>
+            <div class="centered-standard">
+                <strong>Standard Belt Widths:</strong> 2m, 5m, 10m
+            </div>
+        </div>
+
+        <!-- Research Workflow & Analysis -->
+        <div class="section">
+            <h2>Research Workflow & Analysis</h2>
+            
+            <h3>Workflow</h3>
+            <p><strong>Protocol Design</strong> — Configure sampling methodology and spatial design</p>
+            <p><strong>Field Collection</strong> — GPS-guided sampling with real-time validation</p>
+            <p><strong>Analysis & Export</strong> — Statistical analysis and publication-ready outputs</p>
+
+            <h3>Analysis Capabilities</h3>
+            <p><strong>Statistical Analysis:</strong> Shannon-Wiener, Simpson's, Chao1 indices with confidence intervals and multivariate statistics</p>
+            <p><strong>Spatial Analysis:</strong> Autocorrelation, hotspot analysis, and species distribution modeling capabilities</p>
+            <p><strong>Collaboration:</strong> Multi-user projects with role-based access and version control for team research</p>
+
+            <h3>API Integration</h3>
+            <div id="termynal" data-termynal style="margin: 2rem 0; max-width: 800px;">
+            <span data-ty="input">import requests</span>
+            <span data-ty="input">response = requests.get('https://api.sighttrack.org/v1/observations', headers={'Authorization': 'Bearer YOUR_API_KEY'})</span>
+
+            <span data-ty="progress"></span>
+            <span data-ty>Export formats: Darwin Core, CSV, GeoJSON, Shapefile, R/Python</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize Lucide icons
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="{% static 'core/js/termynal.js' %}" data-termynal-container="#termynal"></script>
+{% endblock %}

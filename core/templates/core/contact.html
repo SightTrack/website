@@ -9,91 +9,49 @@
 <link rel="icon" href="{% static 'images/favicon.png' %}">
 <style>
     html {
-        overscroll-behavior: none;
         background: #000000;
     }
 
     body {
         margin: 0;
         padding: 0;
-        background-color: #000;
+        background-color: #000000;
         min-height: 100vh;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         color: white;
         overflow-x: hidden;
-        overscroll-behavior: none;
-    }
-
-    #canvas-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        z-index: 1;
     }
 
     .container {
-        max-width: 1000px;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 2rem;
-        min-height: 100vh;
-        position: relative;
-        z-index: 2;
+        padding: 4rem 4rem 2rem;
+        min-height: auto;
     }
-
-    .back-button {
+        .back-button {
         position: fixed;
         top: 2rem;
         left: 2rem;
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
+        width: 24px;
+        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: all 0.3s ease;
         text-decoration: none;
         color: white;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         z-index: 1000;
     }
 
-    .back-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-        border-radius: 50%;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .back-button:hover::before {
-        opacity: 1;
-    }
-
-    .back-button:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px) scale(1.05);
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    .back-button:hover .back-arrow::before,
+    .back-button:hover .back-arrow::after {
+        background: #ccc;
     }
 
     .back-arrow {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
         position: relative;
     }
 
@@ -102,7 +60,7 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 12px;
+        width: 10px;
         height: 2px;
         background: white;
         transform: translate(-50%, -50%) rotate(45deg);
@@ -114,7 +72,7 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 12px;
+        width: 10px;
         height: 2px;
         background: white;
         transform: translate(-50%, -50%) rotate(-45deg);
@@ -123,30 +81,8 @@
 
     .hero-section {
         text-align: center;
-        padding: 4rem 2rem 2rem;
-        background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        margin-bottom: 3rem;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-        opacity: 0.5;
-        pointer-events: none;
+        padding: 3rem 0 4rem;
+        margin-bottom: 4rem;
     }
 
     h1 {
@@ -154,106 +90,64 @@
         font-weight: 300;
         letter-spacing: -0.02em;
         margin: 0 0 1.5rem 0;
-        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #ffffff;
     }
 
     .subtitle {
         font-size: clamp(1rem, 2.5vw, 1.2rem);
         line-height: 1.6;
         color: #cccccc;
-        margin: 0;
+        margin: 0 auto;
         font-weight: 300;
+        max-width: 600px;
     }
 
     .contact-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 3rem;
     }
 
     .contact-form {
-        background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 2.5rem;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+        border-radius: 12px;
+        padding: 2rem;
     }
 
-    .contact-form::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-        opacity: 0.5;
-        pointer-events: none;
+    .contact-info {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
     }
 
     .success-message {
         background: rgba(34, 197, 94, 0.1);
         border: 1px solid rgba(34, 197, 94, 0.3);
-        border-radius: 12px;
+        border-radius: 8px;
         padding: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         color: #22c55e;
         text-align: center;
-        animation: fadeInUp 0.5s ease;
     }
 
     .error-message {
         background: rgba(239, 68, 68, 0.1);
         border: 1px solid rgba(239, 68, 68, 0.3);
-        border-radius: 12px;
+        border-radius: 8px;
         padding: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         color: #ef4444;
         text-align: center;
-        animation: fadeInUp 0.5s ease;
-    }
-
-    .contact-info {
-        background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 2.5rem;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s both;
-    }
-
-    .contact-info::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-        opacity: 0.5;
-        pointer-events: none;
     }
 
     .section-title {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 500;
         color: #ffffff;
-        margin: 0 0 2rem 0;
+        margin: 0 0 1.5rem 0;
         letter-spacing: -0.01em;
     }
 
@@ -272,15 +166,14 @@
     .form-group input,
     .form-group textarea {
         width: 100%;
-        padding: 1rem;
+        padding: 0.8rem;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
+        border-radius: 8px;
         color: #ffffff;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 1rem;
         transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
         box-sizing: border-box;
     }
 
@@ -289,7 +182,6 @@
         outline: none;
         background: rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
     }
 
     .form-group input::placeholder,
@@ -308,19 +200,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
+        border-radius: 8px;
         padding: 1.5rem;
-        backdrop-filter: blur(10px);
-        box-shadow:
-            0 4px 16px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
         transition: all 0.3s ease;
     }
 
     .captcha-container:hover {
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.05);
         border-color: rgba(255, 255, 255, 0.15);
     }
 
@@ -342,25 +230,23 @@
     }
 
     .captcha-container .captcha img {
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border-radius: 6px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         background: rgba(255, 255, 255, 0.05);
-        padding: 8px;
+        padding: 6px;
     }
 
     .captcha-container .captcha input {
         width: 200px !important;
         text-align: center;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 500;
         letter-spacing: 0.1em;
         background: rgba(255, 255, 255, 0.08) !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 8px !important;
+        border-radius: 6px !important;
         padding: 0.8rem 1rem !important;
         color: #ffffff !important;
-        backdrop-filter: blur(10px);
         transition: all 0.3s ease;
         margin: 0 !important;
     }
@@ -368,7 +254,6 @@
     .captcha-container .captcha input:focus {
         background: rgba(255, 255, 255, 0.12) !important;
         border-color: rgba(255, 255, 255, 0.25) !important;
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
         outline: none !important;
     }
 
@@ -433,46 +318,37 @@
 
     .submit-button {
         width: 100%;
-        padding: 1rem 2rem;
+        padding: 0.8rem 2rem;
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        border-radius: 8px;
         color: #ffffff;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
-        backdrop-filter: blur(20px);
-        box-shadow:
-            0 4px 16px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .submit-button:hover {
         background: rgba(255, 255, 255, 0.15);
         border-color: rgba(255, 255, 255, 0.3);
-        transform: translateY(-2px);
-        box-shadow:
-            0 8px 24px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .contact-method {
         display: flex;
         align-items: center;
-        margin-bottom: 2rem;
-        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
         background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
         transition: all 0.3s ease;
     }
 
     .contact-method:hover {
         background: rgba(255, 255, 255, 0.04);
-        border-color: rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.12);
     }
 
     .contact-icon {
@@ -521,30 +397,11 @@
     }
 
     .office-info {
-        background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 2.5rem;
+        border-radius: 12px;
+        padding: 2rem;
         margin-top: 2rem;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
-    }
-
-    .office-info::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-        opacity: 0.5;
-        pointer-events: none;
     }
 
     .office-hours {
@@ -558,10 +415,10 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
+        padding: 0.8rem;
         background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
     }
 
     .hours-day {
@@ -574,33 +431,21 @@
         font-weight: 300;
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
     @media (max-width: 768px) {
         .container {
-            padding: 1rem;
+            padding: 2rem 1.5rem 1rem;
         }
 
         .back-button {
             top: 1rem;
             left: 1rem;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
         }
 
         .hero-section {
-            padding: 3rem 1.5rem 2rem;
-            margin-bottom: 2rem;
+            padding: 2rem 0 3rem;
+            margin-bottom: 3rem;
         }
 
         .contact-grid {
@@ -611,11 +456,11 @@
         .contact-form,
         .contact-info,
         .office-info {
-            padding: 2rem 1.5rem;
+            padding: 1.5rem;
         }
 
         .contact-method {
-            padding: 1rem;
+            padding: 0.8rem;
         }
 
         .contact-icon {
@@ -633,156 +478,9 @@
 {% endblock %}
 
 {% block content %}
-<div id="canvas-container"></div>
-
 <a href="{% url 'index' %}" class="back-button">
     <div class="back-arrow"></div>
 </a>
-
-<script type="importmap">
-    {
-        "imports": {
-            "three": "/static/core/js/build/three.webgpu.js",
-            "three/webgpu": "/static/core/js/build/three.webgpu.js",
-            "three/tsl": "/static/core/js/build/three.tsl.js",
-            "three/addons/": "/static/core/js/jsm/"
-        }
-    }
-</script>
-
-<script type="module">
-    import * as THREE from 'three';
-    import { varying, vec4, add, positionLocal, sin, cos } from 'three/tsl';
-
-    let container;
-    let camera, scene, renderer;
-
-    // WebGL availability detection
-    function isWebGLAvailable() {
-        try {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-            if (!context) {
-                return false;
-            }
-
-            const extensions = context.getSupportedExtensions();
-            return extensions !== null;
-
-        } catch (error) {
-            console.log('WebGL detection error:', error);
-            return false;
-        }
-    }
-
-    // Static fallback when WebGL is not available
-    function setupStaticFallback() {
-        const fallbackDiv = document.createElement('div');
-        fallbackDiv.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-            z-index: 1;
-        `;
-        container.appendChild(fallbackDiv);
-
-        console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
-    }
-
-    function init() {
-        container = document.getElementById('canvas-container');
-
-        // Test WebGL availability before proceeding
-        if (!isWebGLAvailable()) {
-            console.log('WebGL not available, using static fallback');
-            setupStaticFallback();
-            return;
-        }
-
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
-        camera.position.z = 1000;
-
-        scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x000000, 700, 3000);
-
-        // Sky - Black center with navy blue edges and visible texture
-        const geometry = new THREE.IcosahedronGeometry(1, 6);
-        const material = new THREE.MeshBasicNodeMaterial({
-            colorNode: varying(
-                vec4(
-                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                        )
-                    ), // Red channel - visible crosshatch pattern
-                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                        )
-                    ), // Green channel - same as red to avoid green tint
-                    add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
-                        sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
-                            cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
-                        )
-                    ), // Blue channel - most visible pattern
-                    1.0
-                )
-            ),
-            side: THREE.BackSide
-        });
-
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.z = 0.75;
-        mesh.scale.setScalar(1200);
-        scene.add(mesh);
-
-        // Renderer
-        try {
-            renderer = new THREE.WebGPURenderer({
-                antialias: false,
-                forceWebGL: false,
-                powerPreference: "high-performance"
-            });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setAnimationLoop(animate);
-            renderer.toneMapping = THREE.NeutralToneMapping;
-            container.appendChild(renderer.domElement);
-        } catch (error) {
-            console.error('Renderer initialization failed:', error);
-            setupStaticFallback();
-            return;
-        }
-
-        // Event listeners
-        window.addEventListener('resize', onWindowResize);
-    }
-
-    function onWindowResize() {
-        if (!camera || !renderer) return;
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function animate() {
-        render();
-    }
-
-    function render() {
-        try {
-            renderer.render(scene, camera);
-        } catch (error) {
-            console.error('Error during rendering:', error);
-        }
-    }
-
-    init();
-</script>
 
 <div class="container">
     <div class="hero-section">

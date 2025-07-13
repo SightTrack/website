@@ -4,12 +4,9 @@
 {% block title %}Learn More - SightTrack{% endblock %}
 
 {% block extra_head %}
+<!-- Lucide Icons CDN -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
-    html {
-        overscroll-behavior: none;
-        background: #000000;
-    }
-
     body {
         margin: 0;
         padding: 0;
@@ -18,79 +15,39 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         color: white;
         overflow-x: hidden;
-        overscroll-behavior: none;
-    }
-
-    #canvas-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        z-index: 1;
     }
 
     .container {
-        max-width: 900px;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 2rem;
-        min-height: 100vh;
+        padding: 2rem 4rem;
         position: relative;
-        z-index: 2;
     }
 
     .back-button {
         position: fixed;
         top: 2rem;
         left: 2rem;
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
+        width: 24px;
+        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: all 0.3s ease;
         text-decoration: none;
         color: white;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         z-index: 1000;
     }
 
-    .back-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-        border-radius: 50%;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .back-button:hover::before {
-        opacity: 1;
-    }
-
-    .back-button:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px) scale(1.05);
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    .back-button:hover .back-arrow::before,
+    .back-button:hover .back-arrow::after {
+        background: #ccc;
     }
 
     .back-arrow {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
         position: relative;
     }
 
@@ -99,7 +56,7 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 12px;
+        width: 10px;
         height: 2px;
         background: white;
         transform: translate(-50%, -50%) rotate(45deg);
@@ -111,7 +68,7 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 12px;
+        width: 10px;
         height: 2px;
         background: white;
         transform: translate(-50%, -50%) rotate(-45deg);
@@ -119,61 +76,19 @@
     }
 
     .content-section {
-        background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 3rem;
-        margin-bottom: 2rem;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .content-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-        opacity: 0.5;
-        pointer-events: none;
+        margin-bottom: 4rem;
+        padding: 0;
     }
 
     .hero-section {
         text-align: center;
-        padding: 4rem 3rem 3rem;
-    }
-
-    .content-section:nth-child(2) {
-        animation-delay: 0.1s;
-    }
-
-    .content-section:nth-child(3) {
-        animation-delay: 0.2s;
-    }
-
-    .content-section:nth-child(4) {
-        animation-delay: 0.3s;
-    }
-
-    .content-section:nth-child(5) {
-        animation-delay: 0.4s;
-    }
-
-    .content-section:nth-child(6) {
-        animation-delay: 0.5s;
+        padding: 2rem 0 4rem;
     }
 
     h1 {
-        font-size: clamp(2.5rem, 6vw, 4rem);
-        font-weight: 300;
-        letter-spacing: -0.02em;
+        font-size: clamp(3rem, 8vw, 5rem);
+        font-weight: 600;
+        letter-spacing: -0.03em;
         margin: 0 0 1.5rem 0;
         background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
         -webkit-background-clip: text;
@@ -182,15 +97,15 @@
     }
 
     h2 {
-        font-size: clamp(1.5rem, 4vw, 2.5rem);
-        font-weight: 400;
-        letter-spacing: -0.01em;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 500;
+        letter-spacing: -0.02em;
         margin: 0 0 1.5rem 0;
         color: #ffffff;
     }
 
     h3 {
-        font-size: clamp(1.2rem, 3vw, 1.8rem);
+        font-size: clamp(1.2rem, 3vw, 1.5rem);
         font-weight: 500;
         letter-spacing: -0.01em;
         margin: 0 0 1rem 0;
@@ -198,16 +113,23 @@
     }
 
     p {
-        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        font-size: clamp(1.1rem, 2vw, 1.3rem);
         line-height: 1.6;
-        color: #cccccc;
+        color: #b0b0b0;
         margin: 0 0 1.5rem 0;
         font-weight: 300;
     }
 
+    .hero-section p {
+        color: #cccccc;
+        font-size: clamp(1.2rem, 3vw, 1.8rem);
+        font-weight: 300;
+        line-height: 1.4;
+    }
+
     .highlight {
         color: #ffffff;
-        font-weight: 400;
+        font-weight: 500;
     }
 
     .feature-grid {
@@ -218,30 +140,86 @@
     }
 
     .feature-card {
-        background: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(10px);
+        background: #0a0a0a;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         padding: 2rem;
-        transition: all 0.3s ease;
+        text-align: left;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        background: conic-gradient(
+            from 0deg,
+            transparent 0%,
+            transparent 20%,
+            rgba(221, 123, 187, 0.9) 30%,
+            rgba(215, 159, 30, 0.9) 45%,
+            rgba(90, 146, 44, 0.9) 60%,
+            rgba(76, 120, 148, 0.9) 75%,
+            transparent 85%,
+            transparent 100%
+        );
+        opacity: 0;
+        transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: rotate 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        z-index: -2;
+    }
+
+    .feature-card::after {
+        content: '';
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        background: #0a0a0a;
+        z-index: -1;
+    }
+
+    .feature-card:hover::before {
+        opacity: 1;
     }
 
     .feature-card:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.15);
         transform: translateY(-5px);
+        border-color: transparent;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes rotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        50% {
+            transform: rotate(180deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     .feature-icon {
         width: 50px;
         height: 50px;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 1.5rem;
         font-size: 1.5rem;
+    }
+
+    .feature-icon svg {
+        width: 24px;
+        height: 24px;
+        stroke: #ffffff;
+        stroke-width: 2;
     }
 
     .stats-container {
@@ -254,9 +232,16 @@
     .stat-card {
         text-align: center;
         padding: 2rem;
-        background: rgba(255, 255, 255, 0.02);
+        background: #0a0a0a;
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     }
 
     .stat-number {
@@ -273,79 +258,25 @@
     }
 
     .cta-button {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        background: #ffffff;
+        color: #000000;
+        border: none;
+        border-radius: 8px;
         padding: 1rem 2rem;
-        color: white;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 1.1rem;
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         text-decoration: none;
         display: inline-block;
         margin: 1rem 0.5rem 0 0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cta-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transition: left 0.6s ease;
-    }
-
-    .cta-button:hover::before {
-        left: 100%;
     }
 
     .cta-button:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
-        box-shadow:
-            0 8px 25px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @media (max-width: 768px) {
-        .container {
-            padding: 1rem;
-        }
-
-        .back-button {
-            top: 1rem;
-            left: 1rem;
-            width: 50px;
-            height: 50px;
-        }
-
-        .content-section {
-            padding: 2rem;
-        }
-
-        .hero-section {
-            padding: 3rem 2rem 2rem;
-        }
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.25);
+        background: #f5f5f5;
     }
 
     .gallery-section {
@@ -357,7 +288,6 @@
         margin: 2rem 0;
         position: relative;
         overflow: hidden;
-        /* Remove horizontal scrolling */
     }
 
     .gallery-scroll {
@@ -365,40 +295,71 @@
         gap: 2rem;
         padding: 0 2rem;
         width: max-content;
-        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         will-change: transform;
     }
 
     .preview-card {
         flex-shrink: 0;
         width: 200px;
-        background: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(10px);
+        background: #0a0a0a;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
+        border-radius: 12px;
         padding: 1.5rem;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
-        /* Enable smooth transitions */
         will-change: transform;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .preview-card::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        background: conic-gradient(
+            from 0deg,
+            transparent 0%,
+            transparent 20%,
+            rgba(221, 123, 187, 0.9) 30%,
+            rgba(215, 159, 30, 0.9) 45%,
+            rgba(90, 146, 44, 0.9) 60%,
+            rgba(76, 120, 148, 0.9) 75%,
+            transparent 85%,
+            transparent 100%
+        );
+        opacity: 0;
+        transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: rotate 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        z-index: -2;
+    }
+
+    .preview-card::after {
+        content: '';
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        background: #0a0a0a;
+        z-index: -1;
+    }
+
+    .preview-card:hover::before {
+        opacity: 1;
     }
 
     .preview-card:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.15);
         transform: translateY(-5px) scale(1.02);
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        border-color: transparent;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
     }
 
     .preview-image {
         width: 100%;
         height: auto;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         transition: transform 0.3s ease;
-        /* Prevent image dragging */
         user-select: none;
         -webkit-user-drag: none;
     }
@@ -407,7 +368,6 @@
         transform: scale(1.05);
     }
 
-    /* Gallery Controls */
     .gallery-controls {
         display: flex;
         justify-content: center;
@@ -420,7 +380,6 @@
         width: 40px;
         height: 40px;
         background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 50%;
         display: flex;
@@ -478,8 +437,26 @@
         transform: scale(1.2);
     }
 
-    /* Mobile optimizations */
     @media (max-width: 768px) {
+        .container {
+            padding: 1rem 2rem;
+        }
+
+        .back-button {
+            top: 1rem;
+            left: 1rem;
+            width: 45px;
+            height: 45px;
+        }
+
+        .content-section {
+            margin-bottom: 2rem;
+        }
+
+        .hero-section {
+            padding: 2rem 0 3rem;
+        }
+
         .preview-card {
             width: 160px;
         }
@@ -487,166 +464,19 @@
         .scroll-btn {
             display: none;
         }
-    }
 
-    /* Touch-friendly scrolling */
-    .gallery-container {
-        touch-action: pan-x;
+        .gallery-container {
+            touch-action: pan-x;
+        }
     }
+</style>
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="canvas-container"></div>
-
 <a href="{% url 'index' %}" class="back-button">
     <div class="back-arrow"></div>
 </a>
-
-<script type="importmap">
-    {
-        "imports": {
-            "three": "/static/core/js/build/three.webgpu.js",
-            "three/webgpu": "/static/core/js/build/three.webgpu.js",
-            "three/tsl": "/static/core/js/build/three.tsl.js",
-            "three/addons/": "/static/core/js/jsm/"
-        }
-    }
-</script>
-
-<script type="module">
-    import * as THREE from 'three';
-    import { varying, vec4, add, positionLocal, sin, cos } from 'three/tsl';
-
-    let container;
-    let camera, scene, renderer;
-
-    // WebGL availability detection
-    function isWebGLAvailable() {
-        try {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-            if (!context) {
-                return false;
-            }
-
-            const extensions = context.getSupportedExtensions();
-            return extensions !== null;
-
-        } catch (error) {
-            console.log('WebGL detection error:', error);
-            return false;
-        }
-    }
-
-    // Static fallback when WebGL is not available
-    function setupStaticFallback() {
-        const fallbackDiv = document.createElement('div');
-        fallbackDiv.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-            z-index: 1;
-        `;
-        container.appendChild(fallbackDiv);
-
-        console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
-    }
-
-    function init() {
-        container = document.getElementById('canvas-container');
-
-        // Test WebGL availability before proceeding
-        if (!isWebGLAvailable()) {
-            console.log('WebGL not available, using static fallback');
-            setupStaticFallback();
-            return;
-        }
-
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
-        camera.position.z = 1000;
-
-        scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x000000, 700, 3000);
-
-        // Sky - Black center with navy blue edges and visible texture
-        const geometry = new THREE.IcosahedronGeometry(1, 6);
-        const material = new THREE.MeshBasicNodeMaterial({
-            colorNode: varying(
-                vec4(
-                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                        )
-                    ), // Red channel - visible crosshatch pattern
-                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                        )
-                    ), // Green channel - same as red to avoid green tint
-                    add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
-                        sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
-                            cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
-                        )
-                    ), // Blue channel - most visible pattern
-                    1.0
-                )
-            ),
-            side: THREE.BackSide
-        });
-
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.z = 0.75;
-        mesh.scale.setScalar(1200);
-        scene.add(mesh);
-
-        // Renderer
-        try {
-            renderer = new THREE.WebGPURenderer({
-                antialias: false,
-                forceWebGL: false,
-                powerPreference: "high-performance"
-            });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setAnimationLoop(animate);
-            renderer.toneMapping = THREE.NeutralToneMapping;
-            container.appendChild(renderer.domElement);
-        } catch (error) {
-            console.error('Renderer initialization failed:', error);
-            setupStaticFallback();
-            return;
-        }
-
-        // Event listeners
-        window.addEventListener('resize', onWindowResize);
-    }
-
-    function onWindowResize() {
-        if (!camera || !renderer) return;
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function animate() {
-        render();
-    }
-
-    function render() {
-        try {
-            renderer.render(scene, camera);
-        } catch (error) {
-            console.error('Error during rendering:', error);
-        }
-    }
-
-    init();
-</script>
 
 <div class="container">
     <div class="content-section hero-section">
@@ -670,21 +500,27 @@
         <h2>Key Features</h2>
         <div class="feature-grid">
             <div class="feature-card">
-                <div class="feature-icon">🤖</div>
+                <div class="feature-icon">
+                    <i data-lucide="sparkles"></i>
+                </div>
                 <h3>AI-Powered Identification</h3>
                 <p>Our advanced machine learning algorithms can identify thousands of species instantly from your
                     photos with <span class="highlight">95%+ accuracy</span>.</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">📍</div>
+                <div class="feature-icon">
+                    <i data-lucide="map-pin"></i>
+                </div>
                 <h3>Geolocation Tracking</h3>
                 <p>Automatic location tagging helps map species distribution and track <span class="highlight">migration
                         patterns</span> over time.</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">🌐</div>
+                <div class="feature-icon">
+                    <i data-lucide="globe"></i>
+                </div>
                 <h3>Global Community</h3>
                 <p>Connect with naturalists, researchers, and conservation enthusiasts from around the world in our
                     <span class="highlight">collaborative platform</span>.
@@ -692,7 +528,9 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
+                <div class="feature-icon">
+                    <i data-lucide="trending-up"></i>
+                </div>
                 <h3>Real-time Analytics</h3>
                 <p>Track biodiversity trends in your area and contribute to <span class="highlight">scientific
                         research</span> with real-time data analysis.</p>
@@ -803,8 +641,39 @@
             observation matters, and your contribution can help save endangered species and preserve ecosystems for
             future generations.</p>
 
-        <a href="{% url 'get_started' %}" class="cta-button">Get Started Today</a>
-        <a href="https://apps.apple.com/ca/app/sighttrack/id6737868168" class="cta-button">Download App</a>
+            <br>
+
+        <!-- <a href="{% url 'get_started' %}" class="cta-button">Get Started Today</a> -->
+        <a href="{% url 'get_started' %}">
+                        <button class="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-sm font-semibold leading-6 text-white inline-block">
+                            <span class="absolute inset-0 overflow-hidden rounded-full">
+                                <span class="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"></span>
+                            </span>
+                            <div class="relative flex space-x-2 items-center z-10 rounded-full bg-zinc-950 py-2 px-6 ring-1 ring-white/10">
+                                <span>Get Started Today</span>
+                                <svg fill="none" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10.75 8.75L14.25 12L10.75 15.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+                                </svg>
+                            </div>
+                            <span class="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40"></span>
+                        </button>
+                    </a>
+
+        <!-- <a href="https://apps.apple.com/ca/app/sighttrack/id6737868168" class="cta-button">Download App</a> -->
+         <a href="{% url 'get_started' %}" style="margin-left: 1rem;">
+                        <button class="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-sm font-semibold leading-6 text-white inline-block">
+                            <span class="absolute inset-0 overflow-hidden rounded-full">
+                                <span class="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"></span>
+                            </span>
+                            <div class="relative flex space-x-2 items-center z-10 rounded-full bg-zinc-950 py-2 px-6 ring-1 ring-white/10">
+                                <span>Download App</span>
+                                <svg fill="none" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10.75 8.75L14.25 12L10.75 15.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+                                </svg>
+                            </div>
+                            <span class="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40"></span>
+                        </button>
+                    </a>
     </div>
 </div>
 
@@ -889,5 +758,8 @@
         createDots();
         updateControls();
     });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
 </script>
 {% endblock %}

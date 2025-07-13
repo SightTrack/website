@@ -6,91 +6,50 @@
 {% block extra_head %}
 <style>
     html {
-        overscroll-behavior: none;
         background: #000000;
     }
 
-    body {
+    body {  
         margin: 0;
         padding: 0;
-        background-color: #000;
+        background-color: #000000;
         min-height: 100vh;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         color: white;
         overflow-x: hidden;
-        overscroll-behavior: none;
-    }
-
-    #canvas-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        z-index: 1;
     }
 
     .container {
-        max-width: 1000px;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 2rem;
-        min-height: 100vh;
-        position: relative;
-        z-index: 2;
+        padding: 4rem 2rem 2rem;
+        min-height: auto;
     }
 
-    .back-button {
+        .back-button {
         position: fixed;
         top: 2rem;
         left: 2rem;
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
+        width: 24px;
+        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: all 0.3s ease;
         text-decoration: none;
         color: white;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         z-index: 1000;
     }
 
-    .back-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-        border-radius: 50%;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .back-button:hover::before {
-        opacity: 1;
-    }
-
-    .back-button:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px) scale(1.05);
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    .back-button:hover .back-arrow::before,
+    .back-button:hover .back-arrow::after {
+        background: #ccc;
     }
 
     .back-arrow {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
         position: relative;
     }
 
@@ -99,7 +58,7 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 12px;
+        width: 10px;
         height: 2px;
         background: white;
         transform: translate(-50%, -50%) rotate(45deg);
@@ -111,7 +70,7 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 12px;
+        width: 10px;
         height: 2px;
         background: white;
         transform: translate(-50%, -50%) rotate(-45deg);
@@ -120,30 +79,8 @@
 
     .hero-section {
         text-align: center;
-        padding: 4rem 2rem 3rem;
-        background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        margin-bottom: 3rem;
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-        opacity: 0.5;
-        pointer-events: none;
+        padding: 3rem 0 4rem;
+        margin-bottom: 4rem;
     }
 
     h1 {
@@ -151,10 +88,7 @@
         font-weight: 300;
         letter-spacing: -0.02em;
         margin: 0 0 1.5rem 0;
-        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #ffffff;
     }
 
     .subtitle {
@@ -163,174 +97,95 @@
         color: #cccccc;
         margin: 0;
         font-weight: 300;
+        max-width: 600px;
+        margin: 0 auto;
     }
 
     .team-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 2rem;
-        margin: 2rem 0;
+        margin: 3rem 0 1rem;
     }
 
     .leader-section {
         display: flex;
         justify-content: center;
-        margin: 3rem 0;
+        margin: 4rem 0;
     }
 
     .team-leader {
-        background: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
         padding: 3rem;
         text-align: center;
         transition: all 0.3s ease;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        position: relative;
-        overflow: hidden;
         max-width: 400px;
     }
 
-    .team-leader::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
-        opacity: 0.7;
-        pointer-events: none;
-    }
-
     .team-leader:hover {
-        background: rgba(255, 255, 255, 0.04);
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: translateY(-8px) scale(1.02);
-        box-shadow:
-            0 16px 50px rgba(0, 0, 0, 0.5),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
     }
 
     .leader-portrait {
-        width: 150px;
-        height: 150px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         object-fit: cover;
-        margin: 0 auto 2rem;
-        border: 4px solid rgba(255, 255, 255, 0.2);
+        margin: 0 auto 1.5rem;
+        border: 2px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
     }
 
     .team-leader:hover .leader-portrait {
-        transform: scale(1.05);
-        border-color: rgba(255, 255, 255, 0.3);
-        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5);
+        border-color: rgba(255, 255, 255, 0.2);
     }
 
     .leader-name {
-        font-size: 2rem;
-        font-weight: 600;
+        font-size: 1.8rem;
+        font-weight: 500;
         color: #ffffff;
         margin: 0 0 0.5rem 0;
         letter-spacing: -0.01em;
     }
 
     .leader-role {
-        font-size: 1.2rem;
-        color: #cccccc;
+        font-size: 1rem;
+        color: #aaaaaa;
         font-weight: 400;
         margin: 0;
     }
 
     .team-member {
-        background: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
         padding: 1.5rem;
         display: flex;
         align-items: center;
         gap: 1.5rem;
         transition: all 0.3s ease;
-        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .team-member::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-    }
-
-    .team-member:hover::before {
-        opacity: 1;
     }
 
     .team-member:hover {
-        background: rgba(255, 255, 255, 0.03);
-        border-color: rgba(255, 255, 255, 0.15);
-        transform: translateY(-3px);
-        box-shadow:
-            0 12px 40px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-
-    .team-member:nth-child(1) {
-        animation-delay: 0.2s;
-    }
-
-    .team-member:nth-child(2) {
-        animation-delay: 0.3s;
-    }
-
-    .team-member:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-
-    .team-member:nth-child(4) {
-        animation-delay: 0.5s;
-    }
-
-    .team-member:nth-child(5) {
-        animation-delay: 0.6s;
-    }
-
-    .team-member:nth-child(6) {
-        animation-delay: 0.7s;
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.12);
     }
 
     .portrait {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         object-fit: cover;
-        border: 3px solid rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         flex-shrink: 0;
     }
 
     .team-member:hover .portrait {
-        transform: scale(1.05);
-        border-color: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        border-color: rgba(255, 255, 255, 0.15);
     }
 
     .member-info {
@@ -338,7 +193,7 @@
     }
 
     .member-name {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
         font-weight: 500;
         color: #ffffff;
         margin: 0 0 0.3rem 0;
@@ -346,43 +201,31 @@
     }
 
     .member-role {
-        font-size: 1rem;
-        color: #cccccc;
-        font-weight: 300;
+        font-size: 0.95rem;
+        color: #aaaaaa;
+        font-weight: 400;
         margin: 0;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
     }
 
     @media (max-width: 768px) {
         .container {
-            padding: 1rem;
+            padding: 2rem 1rem 1rem;
         }
 
         .back-button {
             top: 1rem;
             left: 1rem;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
         }
 
         .hero-section {
-            padding: 3rem 1.5rem 2rem;
-            margin-bottom: 2rem;
+            padding: 2rem 0 3rem;
+            margin-bottom: 3rem;
         }
 
         .leader-section {
-            margin: 2rem 0;
+            margin: 3rem 0;
         }
 
         .team-leader {
@@ -391,17 +234,18 @@
         }
 
         .leader-portrait {
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
         }
 
         .leader-name {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
         }
 
         .team-grid {
             grid-template-columns: 1fr;
             gap: 1.5rem;
+            margin: 2rem 0 1rem;
         }
 
         .team-member {
@@ -410,12 +254,12 @@
         }
 
         .portrait {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
         }
 
         .member-name {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         .member-role {
@@ -426,162 +270,14 @@
 {% endblock %}
 
 {% block content %}
-<div id="canvas-container"></div>
-
 <a href="{% url 'index' %}" class="back-button">
     <div class="back-arrow"></div>
 </a>
 
-<script type="importmap">
-    {
-        "imports": {
-            "three": "/static/core/js/build/three.webgpu.js",
-            "three/webgpu": "/static/core/js/build/three.webgpu.js",
-            "three/tsl": "/static/core/js/build/three.tsl.js",
-            "three/addons/": "/static/core/js/jsm/"
-        }
-    }
-</script>
-
-<script type="module">
-    import * as THREE from 'three';
-    import { varying, vec4, add, positionLocal, sin, cos } from 'three/tsl';
-
-    let container;
-    let camera, scene, renderer;
-
-    // WebGL availability detection
-    function isWebGLAvailable() {
-        try {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-            if (!context) {
-                return false;
-            }
-
-            const extensions = context.getSupportedExtensions();
-            return extensions !== null;
-
-        } catch (error) {
-            console.log('WebGL detection error:', error);
-            return false;
-        }
-    }
-
-    // Static fallback when WebGL is not available
-    function setupStaticFallback() {
-        const fallbackDiv = document.createElement('div');
-        fallbackDiv.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-            z-index: 1;
-        `;
-        container.appendChild(fallbackDiv);
-
-        console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
-    }
-
-    function init() {
-        container = document.getElementById('canvas-container');
-
-        // Test WebGL availability before proceeding
-        if (!isWebGLAvailable()) {
-            console.log('WebGL not available, using static fallback');
-            setupStaticFallback();
-            return;
-        }
-
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
-        camera.position.z = 1000;
-
-        scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x000000, 700, 3000);
-
-        // Sky - Black center with navy blue edges and visible texture
-        const geometry = new THREE.IcosahedronGeometry(1, 6);
-        const material = new THREE.MeshBasicNodeMaterial({
-            colorNode: varying(
-                vec4(
-                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                        )
-                    ), // Red channel - visible crosshatch pattern
-                    add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                        sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                            cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                        )
-                    ), // Green channel - same as red to avoid green tint
-                    add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
-                        sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
-                            cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
-                        )
-                    ), // Blue channel - most visible pattern
-                    1.0
-                )
-            ),
-            side: THREE.BackSide
-        });
-
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.z = 0.75;
-        mesh.scale.setScalar(1200);
-        scene.add(mesh);
-
-        // Renderer
-        try {
-            renderer = new THREE.WebGPURenderer({
-                antialias: false,
-                forceWebGL: false,
-                powerPreference: "high-performance"
-            });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setAnimationLoop(animate);
-            renderer.toneMapping = THREE.NeutralToneMapping;
-            container.appendChild(renderer.domElement);
-        } catch (error) {
-            console.error('Renderer initialization failed:', error);
-            setupStaticFallback();
-            return;
-        }
-
-        // Event listeners
-        window.addEventListener('resize', onWindowResize);
-    }
-
-    function onWindowResize() {
-        if (!camera || !renderer) return;
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function animate() {
-        render();
-    }
-
-    function render() {
-        try {
-            renderer.render(scene, camera);
-        } catch (error) {
-            console.error('Error during rendering:', error);
-        }
-    }
-
-    init();
-</script>
-
 <div class="container">
     <div class="hero-section">
         <h1>About Us</h1>
-        <p class="subtitle">Meet the passionate team behind SightTrack, dedicated to revolutionizing wildlife
-            conservation through technology and citizen science.</p>
+        <p class="subtitle">Meet the passionate team behind SightTrack, dedicated to revolutionizing wildlife conservation through technology and citizen science.</p>
     </div>
 
     <div class="leader-section">

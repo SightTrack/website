@@ -1,0 +1,407 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Articles - SightTrack{% endblock %}
+
+{% block extra_head %}
+<style>
+    html {
+        background: #000000;
+    }
+
+    body {  
+        margin: 0;
+        padding: 0;
+        background-color: #000000;
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: white;
+        overflow-x: hidden;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 4rem 2rem 2rem;
+        min-height: auto;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 2rem;
+        left: 2rem;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: white;
+        z-index: 1000;
+    }
+
+    .back-button:hover .back-arrow::before,
+    .back-button:hover .back-arrow::after {
+        background: #ccc;
+    }
+
+    .back-arrow {
+        width: 20px;
+        height: 20px;
+        position: relative;
+    }
+
+    .back-arrow::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 10px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(45deg);
+        transform-origin: left center;
+    }
+
+    .back-arrow::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 10px;
+        height: 2px;
+        background: white;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        transform-origin: left center;
+    }
+
+    .hero-section {
+        text-align: center;
+        padding: 3rem 0 4rem;
+        margin-bottom: 4rem;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        margin: 0 0 1.5rem 0;
+        color: #ffffff;
+    }
+
+    .subtitle {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        line-height: 1.6;
+        color: #cccccc;
+        margin: 0;
+        font-weight: 300;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .articles-grid {
+        display: grid;
+        gap: 4rem;
+        margin-bottom: 6rem;
+    }
+
+    .article-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .article-card:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-4px);
+    }
+
+    .article-header {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 768px) {
+        .article-header {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .article-image {
+            order: -1;
+        }
+    }
+
+    .article-title {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 600;
+        color: #ffffff;
+        margin: 0 0 1rem 0;
+        letter-spacing: -0.01em;
+    }
+
+    .article-meta {
+        font-size: 0.9rem;
+        color: #888888;
+        margin-bottom: 1.5rem;
+    }
+
+    .article-image {
+        width: 100%;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888888;
+        font-style: italic;
+        /* border: 2px dashed rgba(255, 255, 255, 0.2); */
+    }
+
+    .article-content {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #e0e0e0;
+        font-weight: 300;
+    }
+
+    .article-content p {
+        margin: 0 0 1.5rem 0;
+    }
+
+    .article-content p:last-child {
+        margin-bottom: 0;
+    }
+
+    .coming-soon {
+        text-align: center;
+        padding: 3rem 0;
+        color: #888888;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Back Button -->
+<a href="javascript:history.back()" class="back-button" aria-label="Go back">
+    <div class="back-arrow"></div>
+</a>
+
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1>Articles</h1>
+        <p class="subtitle">Discover fascinating stories and insights about wildlife, nature, and the creatures that share our world.</p>
+    </div>
+
+    <!-- Articles Grid -->
+    <div class="articles-grid">
+        <!-- Dragon Li Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">The Dragon Li: China's Majestic Wildcat</h2>
+                    <div class="article-meta">Published • Wildlife Feature</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/dragon_li.png' %}" alt="Dragon Li Cat" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>The Dragon Li, also known as the Chinese Li Hua, is a strikingly beautiful domestic cat breed with a wild, tiger-like appearance. Its short coat is dense, glossy, and typically features a unique tabby pattern with distinct mackerel stripes. The base coat is usually a rich golden-brown, and the dark stripes resemble brushstrokes, giving the breed an artistic, natural look. Its large, almond-shaped green or yellow eyes give it a piercing, intelligent gaze, while its broad, rounded head and slightly upturned nose add to its charm. With a muscular yet agile build, the Dragon Li exudes strength and elegance, making it reminiscent of its wildcat ancestors.</p>
+
+                <p>Dragon Li cats are known for their intelligence, curiosity, and independence. They are skilled hunters, a trait inherited from their wild origins, and love engaging in activities that stimulate their mind and body. Despite their independent streak, they are highly affectionate with their families, forming deep bonds with their human companions. They often display a calm demeanor but can be playful and energetic when the mood strikes. Dragon Lis are also known for their vocal nature; they communicate with their owners through a range of meows, chirps, and purrs. They are social cats, often getting along well with other pets and children, provided they have time to adjust.</p>
+
+                <p>Stray Dragon Lis, often found in rural areas or near human settlements in China, are a fascinating mix of wild instinct and domestic adaptability. These cats are highly resourceful, relying on their sharp hunting skills to survive in the wild. They are naturally wary of humans, reflecting their semi-feral roots, but with patience and care, they can learn to trust and adapt to a domestic life. Observing a stray Dragon Li evokes both admiration and a sense of responsibility. Their resilience is awe-inspiring, but it also highlights the importance of humane efforts like spaying, neutering, and providing shelters to ensure their well-being. Stray Dragon Lis are a testament to the enduring connection between humans and cats, reminding us of the need to protect and respect these extraordinary animals.</p>
+            </div>
+        </article>
+
+        <!-- Capybara Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">The Capybara: South America's Gentle Giant</h2>
+                    <div class="article-meta">Published • Wildlife Feature</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/capybara.png' %}" alt="Capybara" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>The capybara (Hydrochoerus hydrochaeris), the largest rodent in the world, is a fascinating and unique animal native to South America. With its barrel-shaped body, short limbs, and webbed feet, the capybara is perfectly adapted to a semi-aquatic lifestyle. Its coarse fur is light brown or reddish, providing excellent camouflage in its grassy and watery habitats. Capybaras have blunt, square-shaped faces with large, dark eyes and small, rounded ears perched high on their heads, allowing them to stay alert while partially submerged in water. Their strong, ever-growing incisors are ideal for grazing on grass, their primary food source.</p>
+
+                <p>Capybaras are highly social and peaceful creatures, living in groups that can range from a few individuals to as many as 100 during the dry season when resources are limited. Their group-oriented behavior is essential for survival, as it provides protection against predators like jaguars, anacondas, and caimans. Communication within a group is achieved through a variety of vocalizations, including barks, whistles, and purr-like sounds. Capybaras spend much of their time grazing on vegetation near water, and they often retreat to rivers, ponds, or marshes to cool off, escape predators, or simply relax. Their webbed feet make them excellent swimmers, and they can even stay submerged for several minutes when threatened.</p>
+
+                <p>The capybara is a remarkable example of nature's adaptability and tranquility. Often referred to as "the world's friendliest animal," it has a reputation for its calm demeanor and ability to coexist peacefully with a wide variety of species, including birds, monkeys, and even crocodiles. Watching capybaras interact with their surroundings and companions evokes a sense of harmony and simplicity. They are a reminder of the beauty of coexistence, adaptability, and the importance of maintaining ecosystems that support diverse life. The capybara's gentle nature and unique characteristics make it a beloved and inspiring animal for people worldwide.</p>
+            </div>
+        </article>
+
+        <!-- Galápagos Giant Tortoise Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">Encountering Giants: A Galápagos Experience</h2>
+                    <div class="article-meta">Published • Travel & Wildlife</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/tortoise.png' %}" alt="Galápagos Giant Tortoise" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>During my visit to the Galápagos Islands, I had the unforgettable experience of spotting a giant tortoise in its natural habitat. The encounter took place in the lush highlands of Santa Cruz, where the air was humid, and the foliage seemed to hum with life. The tortoise, with its massive domed shell and leathery, weathered skin, moved slowly yet deliberately, every step exuding an ancient wisdom. Its dark, expressive eyes seemed to carry the weight of centuries, a testament to its incredible lifespan—some of these gentle giants live well over 100 years.</p>
+
+                <p>Being in the presence of such an iconic species felt like stepping into a living time capsule. The Galápagos tortoises are a powerful symbol of resilience and the unique evolutionary journey that defines these islands. Observing it peacefully munching on grass, undisturbed by my presence, was humbling and inspiring. It served as a poignant reminder of the importance of conservation and the need to protect these remarkable creatures and their fragile ecosystems.</p>
+            </div>
+        </article>
+
+        <!-- Tibetan Yak Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">Yaks of Tibet: Guardians of the High Plateau</h2>
+                    <div class="article-meta">Published • Travel & Wildlife</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/yak.png' %}" alt="Tibetan Yak" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>On the vast, rolling grasslands of the Tibetan Plateau, I encountered one of the region's most iconic creatures: the yak. Surrounded by towering snow mountains and an endless expanse of open sky, the landscape felt both humbling and otherworldly. The air was crisp and thin, carrying the faint scent of wildflowers mixed with the earthy aroma of the yak herds that roam freely across this rugged terrain.</p>
+
+                <p>The yak I observed was a striking sight, its thick, shaggy coat swaying in the brisk wind as it grazed calmly. Its large, curved horns and sturdy build seemed perfectly designed for survival in this high-altitude environment, where winters are harsh, and vegetation is sparse. In Xizang, yaks are more than just animals—they are lifelines. They provide milk, butter, meat, and even warmth from their wool and dried dung, which is used as fuel.</p>
+
+                <p>This encounter left me deeply moved by the harmony between the people of Tibet and their environment. The yaks, so integral to Tibetan culture and survival, symbolize resilience and adaptation in the face of nature's extremes. Watching them move gracefully across the plateau, I couldn't help but feel a deep respect for this ancient bond between the land, its people, and these majestic animals.</p>
+            </div>
+        </article>
+
+        <!-- Coyote Sighting Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">Urban Wildlife Alert: Coyote on the East Don Trail</h2>
+                    <div class="article-meta">April 16, 2021 • Wildlife Sighting</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/coyote.png' %}" alt="Coyote" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>A coyote was sighted on the East Don Trail, Toronto on April 16, 2021. Please be mindful of your personal security if you live near this area.</p>
+
+                <p>The sighting took place just after sunrise on a frosty winter morning along the edge of a wooded trail in the local nature preserve. Standing tall among the trees was a striking coyote, its piercing eyes fixed intently on its surroundings. Its fur was a mix of tawny brown and gray, blending seamlessly with the woods, and its posture displayed a sense of confidence and wild independence. The coyote's demeanor was both commanding and cautious, a true reflection of its role as a survivor in an ever-changing environment.</p>
+
+                <p>The coyote's presence was a reminder of the untamed power of nature, evoking a mixture of respect and wariness. It stood as a symbol of resilience and adaptability, a creature thriving in the face of human encroachment. While I felt privileged to witness it in its natural habitat, its fierce gaze and confident stance served as a humbling reminder of the wild's untamed spirit.</p>
+            </div>
+        </article>
+
+        <!-- Okapi Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">The Forest Giraffe: Discovering the Elusive Okapi</h2>
+                    <div class="article-meta">Published • Wildlife Feature</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/okapi.png' %}" alt="Okapi" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>Deep in the dense, misty rainforests of the Democratic Republic of the Congo, I came across one of the most mysterious and rarely seen creatures in the world—the okapi. Often called the "forest giraffe," this remarkable animal is a living relic, hidden away in the heart of Central Africa.</p>
+
+                <p>With its velvety brown coat, zebra-striped legs, and large, sensitive ears, the okapi looks like a mix of different animals, yet it is a close relative of the giraffe. It moved silently through the undergrowth, its long tongue stripping leaves from low-hanging branches. Despite its size, the okapi seemed to vanish into the shadows with an effortless grace, perfectly adapted to its secluded environment.</p>
+
+                <p>The okapi remains largely unknown to much of the world, and even in its native habitat, it is rarely spotted due to its shy nature. Deforestation and poaching threaten its survival, but conservation efforts in places like the Okapi Wildlife Reserve aim to protect this incredible species.</p>
+
+                <p>Seeing an okapi in the wild felt like uncovering a hidden secret of the natural world—a rare and humbling reminder that there are still wonders left to discover in Earth's most remote places.</p>
+            </div>
+        </article>
+
+        <!-- Brown Bear Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">The Brown Bear: Symbol of Wilderness and Strength</h2>
+                    <div class="article-meta">Published • Wildlife Feature</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/brown_bear.png' %}" alt="Brown Bear" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>The brown bear (Ursus arctos), one of the most powerful and iconic land mammals, is widely distributed across forests, mountains, and tundra regions, including parts of China such as the northeastern forests of Heilongjiang and the Tibetan Plateau. These bears are known for their massive, muscular bodies, thick fur that ranges from light brown to almost black, and a distinctive shoulder hump that sets them apart from other bear species. They have strong limbs equipped with sharp claws, which they use for digging, climbing, and catching prey. Their keen sense of smell, far superior to that of humans, allows them to detect food from great distances, making them highly efficient foragers.</p>
+
+                <p>Brown bears are generally solitary animals, except during mating season or when a mother is raising cubs. They are omnivores, with a diet that includes berries, nuts, fish, small mammals, and even carrion. In some regions, they are skilled hunters of salmon, standing in rushing rivers to catch fish with their powerful paws. Brown bears also exhibit fascinating seasonal behaviors, such as hyperphagia, where they eat excessively to store fat before hibernation. During the winter months, they retreat to dens in caves or hollowed-out trees, where they remain dormant for months, conserving energy until spring arrives. Despite their large size, they are surprisingly agile, capable of running at speeds of up to 50 km/h (30 mph) when necessary.</p>
+
+                <p>The brown bear is a symbol of both strength and resilience in the wild. Observing these magnificent creatures in their natural habitat evokes a deep respect for their power and adaptability. In Chinese culture, while not as prominent as the panda, the brown bear represents bravery and endurance. However, like many large mammals, they face threats from habitat destruction and human conflict. Conservation efforts are crucial to ensuring their survival, as maintaining healthy bear populations is vital for ecosystem balance. The brown bear's majestic presence in the wild serves as a reminder of nature's raw beauty and the importance of coexisting with wildlife.</p>
+            </div>
+        </article>
+
+        <!-- Eurasian Magpie Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">The Eurasian Magpie: Intelligence and Symbolism in Flight</h2>
+                    <div class="article-meta">Published • Wildlife Feature</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/magpie.png' %}" alt="Eurasian Magpie" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>The Eurasian magpie (Pica pica), commonly found in China and many other parts of the world, is a striking bird known for its intelligence and symbolic significance in Chinese culture. It has a distinctive black-and-white plumage, with iridescent blue-green feathers on its wings and tail that shimmer in sunlight. Its long tail, which makes up more than half of its body length, helps with balance and agility in flight. Magpies have sharp, curved beaks suited for foraging, and their dark, expressive eyes reflect their keen awareness of their surroundings. Their adaptable nature allows them to thrive in various environments, from rural countryside to bustling urban areas.</p>
+
+                <p>Magpies are highly intelligent and social birds, often seen in pairs or small groups. They are known for their complex vocalizations, using a variety of calls to communicate with each other. As opportunistic omnivores, magpies have a diverse diet that includes insects, seeds, small animals, and even food scraps from human settlements. One of their most fascinating behaviors is their problem-solving ability; they can use tools, recognize themselves in mirrors—an ability shared by only a few animals—and remember human faces. Magpies are also famous for their elaborate nests, which are carefully constructed with twigs and lined with softer materials. They mate for life, demonstrating strong bonds and cooperative parenting, ensuring the survival of their young.</p>
+
+                <p>In Chinese culture, the magpie is often regarded as a symbol of good luck, happiness, and fortune. Unlike in some Western traditions where they are associated with bad omens, in China, they are celebrated in folklore and literature as bearers of joy. Their presence is believed to bring positive news, and they play a role in the famous Qixi Festival legend, where magpies form a bridge to reunite two separated lovers. Beyond cultural significance, magpies are a testament to nature's intelligence and adaptability. Observing their clever interactions and resourceful behaviors is a reminder of the deep cognitive abilities that exist in the animal world. Their ability to coexist with humans while maintaining their wild instincts makes them a fascinating species worthy of appreciation and respect.</p>
+            </div>
+        </article>
+
+        <!-- Whale Watching Article -->
+        <article class="article-card">
+            <div class="article-header">
+                <div>
+                    <h2 class="article-title">Giants of the Deep: Whale Watching in Newfoundland</h2>
+                    <div class="article-meta">Published • Travel & Wildlife</div>
+                </div>
+                <div class="article-image">
+                    <img src="{% static 'images/articles/whale.png' %}" alt="Humpback Whales" style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <div class="article-content">
+                <p>In the heart of Newfoundland's rugged coastline, surrounded by towering cliffs and the vast expanse of the Atlantic, I had the privilege of witnessing one of nature's most magnificent sights—a pod of whales gliding through the waters. It was a bright summer day near Trinity Bay, where the ocean teemed with life and the air carried the salty breeze of the sea. As I stood on the shoreline, the calm surface was interrupted by a massive spray of mist—the unmistakable sign of a whale exhaling through its blowhole.</p>
+
+                <p>The whales were humpbacks, their sleek, dark bodies glistening in the sunlight as they surfaced and dove in synchronized movements. Their sheer size was awe-inspiring, yet their gentle demeanor made them seem almost approachable. Occasionally, one would breach, leaping out of the water and crashing back with a thunderous splash. The sight was mesmerizing—a moment that felt both humbling and exhilarating.</p>
+
+                <p>Newfoundland is known as one of the best places in the world for whale watching, with over 22 species, including minke, fin, and the occasional blue whale. The combination of rich feeding grounds and pristine waters makes it a haven for these majestic creatures. Watching them, I was reminded of the deep connection between Newfoundland's culture and the ocean, from its history of fishing to its modern eco-tourism.</p>
+
+                <p>The experience left me in awe—not just of the whales but of the vast, interconnected world we share. It's a reminder that these waters are more than a scenic backdrop; they are a thriving, vital ecosystem that deserves our care and respect. If you ever have the chance, stand on Newfoundland's shores or set out on a boat to experience these giants of the deep—it's an encounter you'll never forget.</p>
+            </div>
+        </article>
+
+        <!-- Coming Soon Placeholder -->
+        <div class="coming-soon">
+            <p>More fascinating articles coming soon...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

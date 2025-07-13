@@ -1,49 +1,9 @@
+{% extends 'core/base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}SightTrack{% endblock %}
 
-<head>
-    <title>SightTrack</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="icon" href="{% static 'images/favicon.png' %}">
-
-    <!-- Lenis Smooth Scrolling - Multiple CDN fallbacks -->
-    <script>
-        // Try multiple CDN sources for Lenis
-        const lenisCDNs = [
-            'https://unpkg.com/lenis@1.0.45/dist/lenis.min.js',
-            'https://cdn.jsdelivr.net/npm/lenis@1.0.45/dist/lenis.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/lenis/1.0.29/lenis.min.js'
-        ];
-
-        let lenisLoaded = false;
-        let currentCDNIndex = 0;
-
-        function loadLenisFromCDN(index = 0) {
-            if (index >= lenisCDNs.length) {
-                console.log('All Lenis CDNs failed, will use native scroll');
-                return;
-            }
-
-            const script = document.createElement('script');
-            script.src = lenisCDNs[index];
-            script.onload = function () {
-                lenisLoaded = true;
-                console.log(`Lenis loaded successfully from: ${lenisCDNs[index]}`);
-            };
-            script.onerror = function () {
-                console.log(`Failed to load Lenis from: ${lenisCDNs[index]}`);
-                loadLenisFromCDN(index + 1);
-            };
-            document.head.appendChild(script);
-        }
-
-        // Start loading Lenis immediately
-        loadLenisFromCDN();
-    </script>
-
+{% block extra_head %}
     <style>
         body {
             margin: 0;
@@ -56,61 +16,434 @@
 
         #canvas-container {
             position: fixed;
-            top: 0;
+            top: 10vh; /* Start below navigation bar */
             left: 0;
             width: 100%;
-            height: 100vh;
+            height: 40vh; /* Only cover the birds section area */
             z-index: 1;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #canvas-container.fade-out {
+            opacity: 0;
         }
 
         #content {
             position: relative;
             z-index: 2;
-            height: 320vh;
-            pointer-events: none;
+            min-height: 100vh;
         }
 
         .section {
-            height: 100vh;
+            min-height: 80vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 5%;
+            padding: 4rem 0;
             box-sizing: border-box;
             pointer-events: none;
         }
 
+        .section.hero {
+            min-height: 50vh;
+            padding: 2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+            margin-top: 0;
+        }
+
+        .section.compact {
+            min-height: 60vh;
+            padding: 6rem 0;
+        }
+
         .section.short {
-            height: 30vh;
+            height: 20vh;
             padding-top: 0;
         }
 
         .section.close-to-previous {
-            height: 40vh;
-            margin-top: -40vh;
+            height: 25vh;
+            margin-top: -20vh;
             padding-top: 0;
         }
 
         .title-section {
             background: transparent;
-            height: 10vh;
+            height: 0vh;
+            display: none;
         }
 
         .first-section {
-            /* height: 10vh; */
+            min-height: 12vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 5%;
+            padding: 1rem 5%;
+            box-sizing: border-box;
+            pointer-events: none;
+            position: relative;
+            z-index: 3;
+            background: transparent;
+        }
+
+        /* Navigation bar section */
+        .nav-section {
+            height: 10vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 5% 1rem 5%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .birds-section {
+            height: 40vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero text section */
+        .hero-section {
+            min-height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+            position: relative;
+            z-index: 3;
+        }
+
+        .section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 0;
             box-sizing: border-box;
             pointer-events: none;
         }
 
-        .text-content {
-            max-width: 800px;
+        .section.hero {
+            min-height: 50vh;
+            padding: 2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+            margin-top: 0;
+        }
+
+        /* Scale.com inspired styling */
+        .scale-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 2rem;
+            pointer-events: auto;
+        }
+
+        .scale-hero {
             text-align: center;
             opacity: 0;
-            transform: translateY(50px);
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .scale-hero h1 {
+            font-size: clamp(3.5rem, 8vw, 6rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin: 0 0 2rem 0;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .scale-hero .subtitle {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            color: #a0a0a0;
+            font-weight: 400;
+            margin: 0 0 3rem 0;
+            line-height: 1.4;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .scale-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: #ffffff;
+            color: #000000;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+        }
+
+        .scale-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.25);
+            background: #f5f5f5;
+        }
+
+        .scale-section {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 2rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: auto;
+        }
+
+        .scale-two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .scale-two-column.reverse {
+            direction: rtl;
+        }
+
+        .scale-two-column.reverse > * {
+            direction: ltr;
+        }
+
+        .scale-content h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 1.5rem 0;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+        }
+
+        .scale-content h3 {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: #00ff88;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .scale-content p {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            line-height: 1.6;
+            color: #b0b0b0;
+            margin: 0 0 1.5rem 0;
+            font-weight: 300;
+        }
+
+        .scale-highlight {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .scale-visual {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 255, 136, 0.05) 100%);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 12px;
+            padding: 3rem;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scale-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* background: linear-gradient(45deg, transparent 48%, rgba(0, 255, 136, 0.1) 50%, transparent 52%); */
+            opacity: 0.5;
+        }
+
+        .scale-placeholder {
+            text-align: center;
+            color: #00ff88;
+            font-size: 1rem;
+            z-index: 1;
+        }
+
+        .scale-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .scale-stats {
+            text-align: center;
+            margin: 1rem 0;
+            padding-bottom: 30px;
+        }
+
+        .scale-stats h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 3rem 0;
+        }
+
+        .scale-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            margin: 3rem 0;
+        }
+
+        .scale-stat {
+            text-align: center;
+        }
+
+        .scale-stat-number {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 700;
+            color: #00ff88;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .scale-stat-label {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            font-weight: 400;
+        }
+
+        .scale-cta-section {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 255, 136, 0.02) 100%);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            border-radius: 16px;
+            padding: 4rem;
+            margin: 4rem 0;
+        }
+
+        .scale-cta-section h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .scale-cta-section p {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: #b0b0b0;
+            margin: 0 0 2.5rem 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .scale-cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .scale-cta-primary {
+            background: #00ff88;
+            color: #000000;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .scale-cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.3);
+            background: #00e67a;
+        }
+
+        .scale-cta-secondary {
+            background: transparent;
+            color: #ffffff;
+            padding: 1.2rem 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scale-cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .scale-two-column {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .scale-two-column.reverse {
+                direction: ltr;
+            }
+            
+            .scale-visual {
+                height: 250px;
+                padding: 2rem;
+            }
+            
+            .scale-cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .section {
+                padding: 4rem 0;
+            }
+        }
+
+        .text-content {
+            max-width: 1000px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
             transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             pointer-events: auto;
 
@@ -119,7 +452,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 3rem;
+            padding: 2rem;
             box-shadow:
                 0 8px 32px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -127,6 +460,247 @@
             /* Subtle interactive effects */
             position: relative;
             overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: auto;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            margin: 0 0 1.5rem 0;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content .tagline {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: #cccccc;
+            font-weight: 300;
+            margin: 0 0 2rem 0;
+            line-height: 1.4;
+        }
+
+        .content-section {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: auto;
+        }
+
+        .content-section.reverse {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .content-section.reverse .content-text {
+            order: 2;
+        }
+
+        .content-section.reverse .content-visual {
+            order: 1;
+        }
+
+        .content-text {
+            padding: 2rem;
+        }
+
+        .content-text h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0 0 1.5rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        .content-text h3 {
+            font-size: clamp(1.3rem, 2.5vw, 1.6rem);
+            font-weight: 500;
+            color: #cccccc;
+            margin: 0 0 1rem 0;
+        }
+
+        .content-text p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.6;
+            color: #aaaaaa;
+            margin: 0 0 1.5rem 0;
+            font-weight: 300;
+        }
+
+        .content-text .highlight {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .content-visual {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visual-placeholder {
+            text-align: center;
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        .visual-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: left;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: auto;
+        }
+
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #ffffff;
+            margin: 0 0 1rem 0;
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: #aaaaaa;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .cta-section {
+            max-width: 800px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: auto;
+
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .cta-primary {
+            background: linear-gradient(135deg, #007acc 0%, #0066cc 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.3);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            padding: 1rem 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .content-section {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .content-section.reverse .content-text,
+            .content-section.reverse .content-visual {
+                order: unset;
+            }
+            
+            .content-visual {
+                height: 200px;
+            }
         }
 
         .text-content::before {
@@ -154,20 +728,20 @@
             transform: translateY(-2px);
         }
 
-        .text-content.visible {
+        .text-content.visible, .hero-content.visible, .content-section.visible, .cta-section.visible, .scale-hero.visible, .scale-section.visible {
             opacity: 1;
             transform: translateY(0);
         }
 
-        .text-content.visible:hover {
+        .text-content.visible:hover, .hero-content.visible:hover, .content-section.visible:hover, .cta-section.visible:hover, .scale-section.visible:hover {
             transform: translateY(-2px);
         }
 
         h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
             font-weight: 300;
             letter-spacing: -0.02em;
-            margin: 0 0 2rem 0;
+            margin: 0 0 1.5rem 0;
             background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -175,18 +749,18 @@
         }
 
         h2 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
             font-weight: 400;
             letter-spacing: -0.01em;
-            margin: 0 0 1.5rem 0;
+            margin: 0 0 1rem 0;
             color: #ffffff;
         }
 
         p {
-            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-            line-height: 1.6;
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
+            line-height: 1.5;
             color: #cccccc;
-            margin: 0 0 1.5rem 0;
+            margin: 0 0 1rem 0;
             font-weight: 300;
         }
 
@@ -196,7 +770,7 @@
         }
 
         .subtitle {
-            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
             color: #999999;
             font-weight: 300;
             letter-spacing: 0.01em;
@@ -234,7 +808,7 @@
             gap: 1rem;
             flex-wrap: wrap;
             opacity: 0;
-            transform: translateY(50px);
+            transform: translateY(30px);
             transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             pointer-events: auto;
 
@@ -243,7 +817,8 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 2rem;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            margin-top: 2rem;
             box-shadow:
                 0 8px 32px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -370,9 +945,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
             opacity: 0;
-            transform: translateY(50px);
+            transform: translateY(30px);
             transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             pointer-events: auto;
 
@@ -381,7 +956,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 3rem;
+            padding: 2rem;
             box-shadow:
                 0 8px 32px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -478,19 +1053,345 @@
             font-size: 1rem;
             font-weight: 500;
         }
+
+        /* Text Hover Effect Styles */
+        .text-hover-effect-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 0.5rem auto;
+            cursor: default;
+        }
+
+        #hero-text-svg {
+            width: 100%;
+            height: auto;
+            max-height: 120px;
+            user-select: none;
+        }
+
+        .hero-text-background {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .hero-text-animated {
+            animation: drawText 4s ease-in-out forwards;
+        }
+
+        .hero-text-gradient {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #hero-text-svg:hover .hero-text-background {
+            opacity: 0.7;
+        }
+
+        #hero-text-svg:hover .hero-text-gradient {
+            opacity: 1;
+        }
+
+        @keyframes drawText {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* Responsive text sizing */
+        @media (max-width: 768px) {
+            .hero-text-background,
+            .hero-text-animated,
+            .hero-text-gradient {
+                font-size: 2.5rem !important;
+            }
+            
+            #hero-text-svg {
+                height: 80px;
+                max-height: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-text-background,
+            .hero-text-animated,
+            .hero-text-gradient {
+                font-size: 2rem !important;
+            }
+            
+            #hero-text-svg {
+                height: 70px;
+                max-height: 70px;
+            }
+        }
+
+        /* Globe container styling */
+        #globe-container {
+            border-radius: 12px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        #globe-container canvas {
+            display: block;
+            border-radius: 12px;
+            background: transparent !important;
+        }
+
+        @media (max-width: 768px) {
+            #globe-container {
+                height: 250px !important;
+            }
+        }
+
+        /* Glowing Cards Styling */
+        .glowing-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .glowing-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .glowing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 255, 136, 0.05) 50%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .glowing-card:hover::before {
+            opacity: 1;
+        }
+
+        .glowing-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 255, 136, 0.3);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(0, 255, 136, 0.2);
+        }
+
+        .glowing-card-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .glowing-card:hover .glowing-card-background {
+            opacity: 1;
+        }
+
+        .glowing-card-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+
+        .glowing-card-title {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        .glowing-card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .glowing-card-description {
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            line-height: 1.5;
+            color: #b0b0b0;
+            margin: 0;
+            flex: 1;
+        }
+
+        .glowing-card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .glowing-card-icon svg {
+            width: 16px;
+            height: 16px;
+            color: white;
+            stroke-width: 2;
+        }
+
+        .glowing-card:hover .glowing-card-icon {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Stars Animation Styling */
+        .stars-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 0;
+            margin: 1rem 0;
+            height: 120px;
+        }
+
+        .stars-grid {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 1px;
+            width: 100%;
+            height: 100px;
+            padding: 4px;
+        }
+
+        .star-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .star {
+            width: 1px;
+            height: 1px;
+            background-color: #666;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 20;
+        }
+
+        .star.glowing {
+            background-color: #fff;
+            animation: starGlow 2s ease-in-out;
+        }
+
+        .star.mouse-glow {
+            background-color: #fff;
+            transform: scale(2.5);
+        }
+
+        .star-glow {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            filter: blur(1px);
+            box-shadow: 0 0 8px #60a5fa;
+            opacity: 0;
+            z-index: 10;
+            animation: glowPulse 2s ease-in-out;
+        }
+
+        /* Red glow for researchers card */
+        #stars-researchers .star-glow {
+            background-color: #ef4444;
+            box-shadow: 0 0 8px #f87171;
+        }
+
+        @keyframes starGlow {
+            0% { transform: scale(1); background-color: #666; }
+            20% { transform: scale(1.2); background-color: #fff; }
+            50% { transform: scale(2.5); background-color: #fff; }
+            70% { transform: scale(2.2); background-color: #fff; }
+            100% { transform: scale(1.5); background-color: #fff; }
+        }
+
+        @keyframes glowPulse {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .glowing-card:hover .star {
+            background-color: #fff;
+            transform: scale(1.5);
+        }
+
+        .glowing-card:hover .star-glow {
+            opacity: 1;
+        }
+
+        /* Particle Orb Animation Styles */
+        .orb-wrap {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            animation: rotate-orb 14s infinite linear;
+        }
+
+        @keyframes rotate-orb {
+            100% {
+                transform: rotateY(360deg) rotateX(360deg);
+            }
+        }
+
+        .orb-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        /* Generate individual particle animations */
     </style>
-</head>
+{% endblock %}
 
-<body>
-
+{% block content %}
     <div id="canvas-container"></div>
 
     <div id="content">
-        <section class="section title-section">
-            <!-- Initial space for birds to fly -->
-        </section>
-
-        <section class="first-section">
+        <!-- Navigation Bar -->
+        <section class="nav-section">
             <div class="button-container" data-scroll>
                 <a href="{% url 'get_started' %}">
                     <button class="action-button" data-delay="0">Get Started</button>
@@ -513,591 +1414,420 @@
             </div>
         </section>
 
-        <section class="section">
-            <div class="text-content" data-scroll>
-                <h2>SightTrack</h2>
-                <p class="subtitle">An environmental conservation project that tracks wildlife through citizen
-                    science
-                </p>
+        <section class="birds-section">
+            <!-- This is where the birds will fly -->
+        </section>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="scale-container">
+                <div class="scale-hero" data-scroll>
+                    <div class="text-hover-effect-container">
+                        <svg
+                            id="hero-text-svg"
+                            width="100%"
+                            height="120"
+                            viewBox="0 0 800 120"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="select-none">
+                            <defs>
+                                <linearGradient
+                                    id="textGradient"
+                                    gradientUnits="userSpaceOnUse"
+                                    cx="50%"
+                                    cy="50%"
+                                    r="25%">
+                                    <stop offset="0%" stop-color="#eab308" />
+                                    <stop offset="25%" stop-color="#ef4444" />
+                                    <stop offset="50%" stop-color="#3b82f6" />
+                                    <stop offset="75%" stop-color="#06b6d4" />
+                                    <stop offset="100%" stop-color="#8b5cf6" />
+                                </linearGradient>
+
+                                <radialGradient
+                                    id="revealMask"
+                                    gradientUnits="userSpaceOnUse"
+                                    r="20%"
+                                    cx="50%"
+                                    cy="50%">
+                                    <stop offset="0%" stop-color="white" />
+                                    <stop offset="100%" stop-color="black" />
+                                </radialGradient>
+                                <mask id="textMask">
+                                    <rect x="0" y="0" width="100%" height="100%" fill="url(#revealMask)" />
+                                </mask>
+                            </defs>
+                            
+                            <!-- Background stroke text -->
+                            <text
+                                x="50%"
+                                y="50%"
+                                text-anchor="middle"
+                                dominant-baseline="middle"
+                                stroke-width="0.5"
+                                class="hero-text-background"
+                                style="fill: transparent; stroke: rgba(255, 255, 255, 0.2); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 3.5rem; font-weight: 300; letter-spacing: -0.02em;">
+                                Adaptive AI from Observation to Action
+                            </text>
+                            
+                            <!-- Animated stroke text -->
+                            <text
+                                x="50%"
+                                y="50%"
+                                text-anchor="middle"
+                                dominant-baseline="middle"
+                                stroke-width="0.5"
+                                class="hero-text-animated"
+                                style="fill: transparent; stroke: rgba(255, 255, 255, 0.6); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 3.5rem; font-weight: 300; letter-spacing: -0.02em; stroke-dasharray: 2000; stroke-dashoffset: 2000;">
+                                Adaptive AI from Observation to Action
+                            </text>
+                            
+                            <!-- Gradient masked text -->
+                            <text
+                                x="50%"
+                                y="50%"
+                                text-anchor="middle"
+                                dominant-baseline="middle"
+                                stroke="url(#textGradient)"
+                                stroke-width="0.5"
+                                mask="url(#textMask)"
+                                class="hero-text-gradient"
+                                style="fill: transparent; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 3.5rem; font-weight: 300; letter-spacing: -0.02em;">
+                                Adaptive AI from Observation to Action
+                            </text>
+                        </svg>
+                    </div>
+                    <p class="subtitle" style="margin-bottom: 1.5rem;">SightTrack provides high-quality training data to build breakthrough AI models for wildlife conservation. Join thousands of citizen scientists creating the world's largest biodiversity dataset.</p>
+                    <a href="{% url 'get_started' %}">
+                        <button class="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-sm font-semibold leading-6 text-white inline-block">
+                            <span class="absolute inset-0 overflow-hidden rounded-full">
+                                <span class="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"></span>
+                            </span>
+                            <div class="relative flex space-x-2 items-center z-10 rounded-full bg-zinc-950 py-2 px-6 ring-1 ring-white/10">
+                                <span>Get Started</span>
+                                <svg fill="none" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10.75 8.75L14.25 12L10.75 15.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+                                </svg>
+                            </div>
+                            <span class="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40"></span>
+                        </button>
+                    </a>
+                </div>
             </div>
         </section>
 
+        <!-- Problem Section -->
         <section class="section">
-            <div class="text-content" data-scroll>
-                <h2>Sightings</h2>
-                <p>Similar to <span class="highlight">iNaturalist</span>, we allow users to take photos of animals and
-                    plants. But we also offer various modes of data collection, allowing audiences with or without
-                    scientific expertise to contribute. Each <span class="highlight">sighting</span> taken is analyzed
-                    in real-time to bring local biodiversity updates</p>
+            <div class="scale-container">
+                <div class="scale-section" data-scroll>
+                    <div class="scale-two-column">
+                        <div class="scale-content">
+                            <h3>The Problem</h3>
+                            <h2>Wildlife monitoring at scale is broken</h2>
+                            <p>Despite the rise of citizen science platforms, global biodiversity data is still plagued by three major problems:</p>
+                            <p>Most observations are <span class="scale-highlight">dispersed</span> and <span class="scale-highlight">fragmented</span>. Remote areas, rare species, and seasonal changes are underreported, creating <span class="scale-highlight">data islands</span> that are scientifically unreliable.</p>
+                            <p>Without standardized methods, many photos and records are incomplete or inaccurate. This makes it difficult for researchers to use citizen science data in serious ecological models.</p>
+                            <p>People want to help, but don't know how. Conservation advice is often vague and disconnected from everyday life. As a result, interest <span class="scale-highlight">doesn't lead to impact</span>.</p>
+                        </div>
+                        <div class="scale-visual">
+                            <img src="{% static 'images/figures/figure1.png' %}" alt="Problem Visualization" class="scale-placeholder">
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
+        <!-- Solution Section -->
         <section class="section">
-            <div class="text-content" data-scroll>
-                <h2>Artificial Intelligence</h2>
-                <p>We heavily depend on <span class="highlight">AI</span> for species recognition. However, we also plan
-                    to create species suggestions for data capture, responding to a user's location, migration patterns,
-                    and sighting patterns.</p>
+            <div class="scale-container">
+                <div class="scale-section" data-scroll>
+                    <div class="scale-two-column reverse">
+                        <div class="scale-content">
+                            <h3>Our Solution</h3>
+                            <h2>From everyday observations to ecological impact</h2>
+                            <p>SightTrack bridges the gap between  <span class="scale-highlight">public enthusiasm</span> and <span class="scale-highlight">scientific conservation</span> through an AI-powered platform that turns local wildlife sightings into meaningful action</p>
+                            <p>Our app guides users to biodiversity <span class="scale-highlight">blind spots</span> using intelligent <span class="scale-highlight">sampling recommendations</span>, and teaches simple scientific methods (transects and quadrats) to collect structured, accurate data</p>
+                            <p>Once data is collected, our <span class="scale-highlight">Action-Track</span> engine translates it into precise ecological actions</p>
+                            <p>A complete loop empowers individuals and fuels real conservation, all while enriching scientific biodiversity models</p>
+                        </div>
+                        <div class="scale-visual">
+                            <img src="{% static 'images/figures/figure2.png' %}" alt="Solution Visualization" class="scale-placeholder">
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="section">
-            <div class="github-container" data-scroll>
-                <h2>Open Source</h2>
-                <p>SightTrack is built with transparency and collaboration in mind. Explore our codebase, contribute to
-                    development, or fork the project for your own conservation initiatives.</p>
-
-                <a href="https://github.com/SightTrack" target="_blank" rel="noopener noreferrer" class="github-link">
-                    <svg class="github-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                    </svg>
-                    <span class="github-text">View on GitHub</span>
-                </a>
+        <!-- Impact Section -->
+        <section class="section" style="padding-top: 1rem;">
+            <div class="scale-container">
+                <div class="scale-section" data-scroll>
+                    <div class="scale-stats">
+                        <h2>Powering conservation at scale</h2>
+                        <div class="scale-stats-grid">
+                            <div class="scale-stat">
+                                <span class="scale-stat-number">70K+</span>
+                                <span class="scale-stat-label">Identifiable Species</span>
+                            </div>
+                            <div class="scale-stat">
+                                <span class="scale-stat-number">95%</span>
+                                <span class="scale-stat-label">Vision Accuracy</span>
+                            </div>
+                            <div class="scale-stat">
+                                <span class="scale-stat-number">150+</span>
+                                <span class="scale-stat-label">Countries Covered</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scale-two-column">
+                        <div class="scale-content">
+                            <h3>Global Impact</h3>
+                            <h2>Data that drives decisions</h2>
+                            <p>SightTrack isn't just another nature app. It's a <span class="scale-highlight">high-impact</span> data engine designed to support global biodiversity recovery at every level</p>
+                            <p>By guiding users to underreported areas and species, SightTrack contributes high-quality, structured biodiversity data to global databases like <span class="scale-highlight">GBIF</span> and <span class="scale-highlight">iNaturalist</span>.
+                            This improves the accuracy of species distribution models, ecosystem risk assessments, and conservation planning worldwide.</p>
+                        </div>
+                        <div class="scale-visual" style="background: transparent; border: none; padding: 1rem;">
+                            <div id="globe-container" style="width: 100%; height: 100%; position: relative;">
+                                <div class="scale-placeholder" id="globe-fallback" style="display: none;">
+                                    <div class="scale-icon">🌍</div>
+                                    <p><strong>Global Coverage Map</strong></p>
+                                    <p>Real-time observation heatmap</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
+        <!-- Two boxes Researchers & Public -->
+        <section class="section" style="padding-top: 2rem;">
+            <div class="scale-container">
+                <div class="scale-section" data-scroll>
+                    <div class="glowing-cards-container">
+                        <!-- Researchers Card -->
+                        <div class="glowing-card" data-card-id="researchers">
+                            <div class="glowing-card-background"></div>
+                            <div class="glowing-card-content">
+                                <h3 class="glowing-card-title">For Researchers</h3>
+                                <div class="stars-container">
+                                    <div class="stars-grid" id="stars-researchers"></div>
+                                </div>
+                                <div class="glowing-card-bottom">
+                                    <p class="glowing-card-description">
+                                        Access structured, high-quality biodiversity data with precise geospatial and temporal metadata for your conservation models.
+                                    </p>
+                                    <div class="glowing-card-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Public Card -->
+                        <div class="glowing-card" data-card-id="public">
+                            <div class="glowing-card-background"></div>
+                            <div class="glowing-card-content">
+                                <h3 class="glowing-card-title">For the Public</h3>
+                                <div class="stars-container">
+                                    <div class="stars-grid" id="stars-public"></div>
+                                </div>
+                                <div class="glowing-card-bottom">
+                                    <p class="glowing-card-description">
+                                        Turn your nature walks into meaningful conservation action with AI-guided observations and personalized impact tracking.
+                                    </p>
+                                    <div class="glowing-card-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    </div>
+    <style>
+        /* Particle Orb Animation Styles */
+        .orb-wrap {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            animation: rotate-orb 14s infinite linear;
+        }
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "/static/core/js/build/three.webgpu.js",
-                "three/webgpu": "/static/core/js/build/three.webgpu.js",
-                "three/tsl": "/static/core/js/build/three.tsl.js",
-                "three/addons/": "/static/core/js/jsm/"
+        @keyframes rotate-orb {
+            100% {
+                transform: rotateY(360deg) rotateX(360deg);
             }
         }
-    </script>
 
-    <script type="module">
+        .orb-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            opacity: 0;
+        }
 
-        import * as THREE from 'three';
-        import { uniform, varying, vec4, add, sub, max, dot, sin, mat3, uint, negate, instancedArray, cameraProjectionMatrix, cameraViewMatrix, positionLocal, modelWorldMatrix, sqrt, attribute, property, float, Fn, If, cos, Loop, Continue, normalize, instanceIndex, length, floor, fract, mod } from 'three/tsl';
+        /* Generate individual particle animations */
+    </style>
+    
+    <style id="particle-styles">
+        /* Particle styles will be generated here */
+    </style>
 
+    <script>
         let container;
-        let camera, scene, renderer;
-        let last = performance.now();
-        let pointer, raycaster;
-        let computeVelocity, computePosition, effectController;
         let scrollY = 0;
         let scrollVelocity = 0;
+        let orbWrap;
 
-        const BIRDS = 4096;
-        const SPEED_LIMIT = 9.0;
-        const BOUNDS = 800, BOUNDS_HALF = BOUNDS / 2;
+        // Particle system parameters
+        const PARTICLE_COUNT = 300;
+        const ORB_RADIUS = 100;
+        const ANIMATION_TIME = 14;
+        const BASE_HUE = 180; // Blue-cyan color scheme
 
-        // Custom Geometry - using 3 triangles each. No normals currently.
-        class BirdGeometry extends THREE.BufferGeometry {
-            constructor() {
-                super();
-
-                const trianglesPerBird = 3;
-                const triangles = BIRDS * trianglesPerBird;
-                const points = triangles * 3;
-
-                const vertices = new THREE.BufferAttribute(new Float32Array(points * 3), 3);
-                const references = new THREE.BufferAttribute(new Uint32Array(points), 1);
-                const birdVertex = new THREE.BufferAttribute(new Uint32Array(points), 1);
-
-                this.setAttribute('position', vertices);
-                this.setAttribute('reference', references);
-                this.setAttribute('birdVertex', birdVertex);
-
-                let v = 0;
-
-                function verts_push() {
-                    for (let i = 0; i < arguments.length; i++) {
-                        vertices.array[v++] = arguments[i];
+        function generateParticleStyles() {
+            const styleSheet = document.getElementById('particle-styles');
+            let css = '';
+            
+            for (let i = 1; i <= PARTICLE_COUNT; i++) {
+                // Random angles for 3D positioning
+                const rotZ = Math.random() * 360;
+                const rotY = Math.random() * 360;
+                
+                // Color calculation based on particle index
+                const hue = (40 / PARTICLE_COUNT * i) + BASE_HUE;
+                
+                // Individual particle styling
+                css += `
+                    .orb-particle:nth-child(${i}) {
+                        animation: orbit${i} ${ANIMATION_TIME}s infinite;
+                        animation-delay: ${i * 0.01}s;
+                        background-color: hsla(${hue}, 100%, 50%, 1);
                     }
-                }
-
-                const wingsSpan = 20;
-
-                for (let f = 0; f < BIRDS; f++) {
-                    // Body
-                    verts_push(
-                        0, 0, - 20,
-                        0, - 8, 10,
-                        0, 0, 30
-                    );
-
-                    // Wings
-                    verts_push(
-                        0, 0, - 15,
-                        - wingsSpan, 0, 5,
-                        0, 0, 15
-                    );
-
-                    verts_push(
-                        0, 0, 15,
-                        wingsSpan, 0, 5,
-                        0, 0, - 15
-                    );
-                }
-
-                for (let v = 0; v < triangles * 3; v++) {
-                    const triangleIndex = ~ ~(v / 3);
-                    const birdIndex = ~ ~(triangleIndex / trianglesPerBird);
-                    references.array[v] = birdIndex;
-                    birdVertex.array[v] = v % 9;
-                }
-
-                this.scale(0.2, 0.2, 0.2);
-            }
-        }
-
-        // WebGL availability detection
-        function isWebGLAvailable() {
-            try {
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-                if (!context) {
-                    return false;
-                }
-
-                // Additional check for required extensions
-                const extensions = context.getSupportedExtensions();
-                return extensions !== null;
-
-            } catch (error) {
-                console.log('WebGL detection error:', error);
-                return false;
-            }
-        }
-
-        // Static fallback when WebGL is not available
-        function setupStaticFallback() {
-            // Create a simple gradient background instead of 3D birds
-            const fallbackDiv = document.createElement('div');
-            fallbackDiv.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100vh;
-                background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-                z-index: 1;
-            `;
-
-            // Add subtle animated elements for visual interest
-            const numDots = 50;
-            for (let i = 0; i < numDots; i++) {
-                const dot = document.createElement('div');
-                dot.style.cssText = `
-                    position: absolute;
-                    width: 2px;
-                    height: 2px;
-                    background: rgba(255, 255, 255, ${Math.random() * 0.5 + 0.1});
-                    border-radius: 50%;
-                    left: ${Math.random() * 100}%;
-                    top: ${Math.random() * 100}%;
-                    animation: twinkle ${2 + Math.random() * 3}s ease-in-out infinite alternate;
+                    
+                    @keyframes orbit${i} {
+                        20% {
+                            opacity: 1;
+                        }
+                        30% {
+                            transform: rotateZ(-${rotZ}deg) rotateY(${rotY}deg) translateX(${ORB_RADIUS}px) rotateZ(${rotZ}deg);
+                        }
+                        80% {
+                            transform: rotateZ(-${rotZ}deg) rotateY(${rotY}deg) translateX(${ORB_RADIUS}px) rotateZ(${rotZ}deg);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: rotateZ(-${rotZ}deg) rotateY(${rotY}deg) translateX(${ORB_RADIUS * 3}px) rotateZ(${rotZ}deg);
+                        }
+                    }
                 `;
-                fallbackDiv.appendChild(dot);
+            }
+            
+            styleSheet.textContent = css;
+        }
+
+        function createParticleOrb() {
+            container = document.getElementById('canvas-container');
+            
+            // Create the main orb wrapper (equivalent to .wrap in HAML)
+            orbWrap = document.createElement('div');
+            orbWrap.className = 'orb-wrap';
+            
+            // Create 300 particles (equivalent to the HAML loop)
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'orb-particle';
+                orbWrap.appendChild(particle);
+            }
+            
+            container.appendChild(orbWrap);
+            
+            // Generate the dynamic CSS styles
+            generateParticleStyles();
+            
+            // Add scroll-based fade effect
+            setupScrollEffects();
+        }
+
+        function setupScrollEffects() {
+            // Fade out particles as user scrolls down
+            function updateScrollEffect() {
+                const maxFadeDistance = window.innerHeight * 0.5;
+                const fadeOpacity = Math.max(0, 1 - (scrollY / maxFadeDistance));
+                container.style.opacity = fadeOpacity;
             }
 
-            // Add CSS animation for twinkling
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes twinkle {
-                    from { opacity: 0.2; }
-                    to { opacity: 1; }
-                }
-            `;
-            document.head.appendChild(style);
+            // Update scroll tracking
+            function handleScroll() {
+                const currentScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+                scrollVelocity = currentScrollY - scrollY;
+                scrollY = currentScrollY;
+                updateScrollEffect();
+            }
 
-            container.appendChild(fallbackDiv);
-
-            // Initialize scroll animations even without WebGL
-            initScrollAnimations();
-
-            // Add a subtle notice for the user (optional)
-            console.log('Note: 3D visualization unavailable. Hardware acceleration may be disabled.');
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            
+            // Initial update
+            updateScrollEffect();
         }
 
         function init() {
-            container = document.getElementById('canvas-container');
-
-            // Test WebGL availability before proceeding
-            if (!isWebGLAvailable()) {
-                console.log('WebGL not available, using static fallback');
-                setupStaticFallback();
-                return;
-            }
-
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
-            camera.position.z = 1000;
-
-            scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x000000, 700, 3000);
-
-            // Pointer
-            pointer = new THREE.Vector2(0, 10); // Initialize pointer with default values
-            raycaster = new THREE.Raycaster();
-
-            // Sky - Black center with navy blue edges and visible texture
-            const geometry = new THREE.IcosahedronGeometry(1, 6);
-            const material = new THREE.MeshBasicNodeMaterial({
-                colorNode: varying(
-                    vec4(
-                        add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                            sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                                cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                            )
-                        ), // Red channel - visible crosshatch pattern
-                        add(0.01, positionLocal.y.mul(positionLocal.y).mul(0.04)).add(
-                            sin(positionLocal.x.mul(80.0)).mul(sin(positionLocal.z.mul(85.0))).mul(0.025).add(
-                                cos(positionLocal.x.mul(160.0).add(positionLocal.z.mul(170.0))).mul(0.015)
-                            )
-                        ), // Green channel - same as red to avoid green tint
-                        add(0.02, positionLocal.y.mul(positionLocal.y).mul(0.12)).add(
-                            sin(positionLocal.x.mul(70.0).add(0.3)).mul(sin(positionLocal.z.mul(75.0).add(0.8))).mul(0.035).add(
-                                cos(positionLocal.x.mul(140.0).add(positionLocal.z.mul(150.0))).mul(0.02)
-                            )
-                        ), // Blue channel - most visible pattern
-                        1.0
-                    )
-                ),
-                side: THREE.BackSide
-            });
-
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.rotation.z = 0.75;
-            mesh.scale.setScalar(1200);
-            scene.add(mesh);
-
-            // Renderer
-            try {
-                renderer = new THREE.WebGPURenderer({
-                    antialias: false,
-                    forceWebGL: false,
-                    powerPreference: "high-performance"
-                });
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setAnimationLoop(animate);
-                renderer.toneMapping = THREE.NeutralToneMapping;
-                container.appendChild(renderer.domElement);
-            } catch (error) {
-                console.error('Renderer initialization failed:', error);
-                setupStaticFallback();
-                return;
-            }
-
-            // Initialize arrays
-            const positionArray = new Float32Array(BIRDS * 3);
-            const velocityArray = new Float32Array(BIRDS * 3);
-            const phaseArray = new Float32Array(BIRDS);
-
-            for (let i = 0; i < BIRDS; i++) {
-                const posX = Math.random() * BOUNDS - BOUNDS_HALF;
-                const posY = Math.random() * BOUNDS - BOUNDS_HALF;
-                const posZ = Math.random() * BOUNDS - BOUNDS_HALF;
-
-                positionArray[i * 3 + 0] = posX;
-                positionArray[i * 3 + 1] = posY;
-                positionArray[i * 3 + 2] = posZ;
-
-                const velX = Math.random() - 0.5;
-                const velY = Math.random() - 0.5;
-                const velZ = Math.random() - 0.5;
-
-                velocityArray[i * 3 + 0] = velX * 10;
-                velocityArray[i * 3 + 1] = velY * 10;
-                velocityArray[i * 3 + 2] = velZ * 10;
-
-                phaseArray[i] = 1;
-            }
-
-            const positionStorage = instancedArray(positionArray, 'vec3').label('positionStorage');
-            const velocityStorage = instancedArray(velocityArray, 'vec3').label('velocityStorage');
-            const phaseStorage = instancedArray(phaseArray, 'float').label('phaseStorage');
-
-            positionStorage.setPBO(true);
-            velocityStorage.setPBO(true);
-            phaseStorage.setPBO(true);
-
-            effectController = {
-                separation: uniform(15.0).label('separation'),
-                alignment: uniform(20.0).label('alignment'),
-                cohesion: uniform(20.0).label('cohesion'),
-                freedom: uniform(0.75).label('freedom'),
-                now: uniform(0.0),
-                deltaTime: uniform(0.0).label('deltaTime'),
-                rayOrigin: uniform(new THREE.Vector3()).label('rayOrigin'),
-                rayDirection: uniform(new THREE.Vector3()).label('rayDirection'),
-                isScrolling: uniform(0.0).label('isScrolling'),
-                scrollVel: uniform(0.0).label('scrollVel'),
-                scrollPos: uniform(0.0).label('scrollPos')
-            };
-
-            // Bird geometry and material
-            const birdGeometry = new BirdGeometry();
-            const birdMaterial = new THREE.NodeMaterial();
-
-            const birdVertexTSL = Fn(() => {
-                const reference = attribute('reference');
-                const birdVertex = attribute('birdVertex');
-
-                const position = positionLocal.toVar();
-                const newPhase = phaseStorage.element(reference).toVar();
-                const newVelocity = normalize(velocityStorage.element(reference)).toVar();
-
-                If(birdVertex.equal(4).or(birdVertex.equal(7)), () => {
-                    position.y = sin(newPhase).mul(5.0);
-                });
-
-                const newPosition = modelWorldMatrix.mul(position);
-
-                newVelocity.z.mulAssign(- 1.0);
-                const xz = length(newVelocity.xz);
-                const xyz = float(1.0);
-                const x = sqrt((newVelocity.y.mul(newVelocity.y)).oneMinus());
-
-                const cosry = newVelocity.x.div(xz).toVar();
-                const sinry = newVelocity.z.div(xz).toVar();
-                const cosrz = x.div(xyz);
-                const sinrz = newVelocity.y.div(xyz).toVar();
-
-                const maty = mat3(
-                    cosry, 0, negate(sinry),
-                    0, 1, 0,
-                    sinry, 0, cosry
-                );
-
-                const matz = mat3(
-                    cosrz, sinrz, 0,
-                    negate(sinrz), cosrz, 0,
-                    0, 0, 1
-                );
-
-                const finalVert = maty.mul(matz).mul(newPosition);
-                finalVert.addAssign(positionStorage.element(reference));
-
-                return cameraProjectionMatrix.mul(cameraViewMatrix).mul(finalVert);
-            });
-
-            birdMaterial.vertexNode = birdVertexTSL();
-            birdMaterial.side = THREE.DoubleSide;
-            birdMaterial.transparent = true;
-            birdMaterial.colorNode = Fn(() => {
-                const reference = attribute('reference');
-                const phase = phaseStorage.element(reference);
-                const velocity = velocityStorage.element(reference);
-
-                // Subtle flapping opacity effect
-                const flapOpacity = sin(phase.mul(1.5)).mul(0.15).add(0.8); // 0.65 to 0.95 opacity
-
-                // Soft color variation based on movement
-                const speed = length(velocity);
-                const blueHint = speed.div(30.0).mul(0.1).add(0.95); // Subtle blue when moving fast
-
-                return vec4(blueHint, blueHint, 1.0, flapOpacity);
-            })(); // Fluid white-blue birds with flapping opacity
-
-            const birdMesh = new THREE.Mesh(birdGeometry, birdMaterial);
-            birdMesh.rotation.y = Math.PI / 2;
-            birdMesh.matrixAutoUpdate = false;
-            birdMesh.frustumCulled = false;
-            birdMesh.updateMatrix();
-
-            // Compute shaders
-            computeVelocity = Fn(() => {
-                const PI = float(3.141592653589793);
-                const PI_2 = PI.mul(2.0);
-                const limit = property('float', 'limit').assign(SPEED_LIMIT);
-
-                const { alignment, separation, cohesion, deltaTime, rayOrigin, rayDirection, isScrolling, scrollVel, scrollPos, now } = effectController;
-
-                // Adjust flocking parameters based on scroll position (not just active scrolling)
-                const formationTightness = scrollPos.mul(2.0); // More scroll = tighter formation
-                const scrollCohesion = cohesion.add(isScrolling.mul(25.0)).add(formationTightness.mul(15.0)); // Stronger grouping when scrolled
-                const scrollSeparation = separation.mul(float(1.0).sub(isScrolling.mul(0.4)).sub(formationTightness.mul(0.3))); // Less separation when scrolled
-
-                const zoneRadius = scrollSeparation.add(alignment).add(scrollCohesion).toConst();
-                const separationThresh = scrollSeparation.div(zoneRadius).toConst();
-                const alignmentThresh = (scrollSeparation.add(alignment)).div(zoneRadius).toConst();
-                const zoneRadiusSq = zoneRadius.mul(zoneRadius).toConst();
-
-                const birdIndex = instanceIndex.toConst('birdIndex');
-                const position = positionStorage.element(birdIndex).toVar();
-                const velocity = velocityStorage.element(birdIndex).toVar();
-
-                // Mouse interaction
-                const directionToRay = rayOrigin.sub(position).toConst();
-                const projectionLength = dot(directionToRay, rayDirection).toConst();
-                const closestPoint = rayOrigin.sub(rayDirection.mul(projectionLength)).toConst();
-                const directionToClosestPoint = closestPoint.sub(position).toConst();
-                const distanceToClosestPoint = length(directionToClosestPoint).toConst();
-                const distanceToClosestPointSq = distanceToClosestPoint.mul(distanceToClosestPoint).toConst();
-
-                const rayRadius = float(150.0).toConst();
-                const rayRadiusSq = rayRadius.mul(rayRadius).toConst();
-
-                If(distanceToClosestPointSq.lessThan(rayRadiusSq), () => {
-                    const velocityAdjust = (distanceToClosestPointSq.div(rayRadiusSq).sub(1.0)).mul(deltaTime).mul(100.0);
-                    velocity.addAssign(normalize(directionToClosestPoint).mul(velocityAdjust));
-                    limit.addAssign(5.0);
-                });
-
-                // Gentle center attraction to keep birds in view
-                const dirToCenter = position.toVar();
-                dirToCenter.y.mulAssign(2.5);
-                velocity.subAssign(normalize(dirToCenter).mul(deltaTime).mul(4.0));
-
-                // Standard flocking behavior
-                Loop({ start: uint(0), end: uint(BIRDS), type: 'uint', condition: '<' }, ({ i }) => {
-                    If(i.equal(birdIndex), () => {
-                        Continue();
-                    });
-
-                    const birdPosition = positionStorage.element(i);
-                    const dirToBird = birdPosition.sub(position);
-                    const distToBird = length(dirToBird);
-
-                    If(distToBird.lessThan(0.0001), () => {
-                        Continue();
-                    });
-
-                    const distToBirdSq = distToBird.mul(distToBird);
-
-                    If(distToBirdSq.greaterThan(zoneRadiusSq), () => {
-                        Continue();
-                    });
-
-                    const percent = distToBirdSq.div(zoneRadiusSq);
-
-                    If(percent.lessThan(separationThresh), () => {
-                        const velocityAdjust = (separationThresh.div(percent).sub(1.0)).mul(deltaTime);
-                        velocity.subAssign(normalize(dirToBird).mul(velocityAdjust));
-                    }).ElseIf(percent.lessThan(alignmentThresh), () => {
-                        const threshDelta = alignmentThresh.sub(separationThresh);
-                        const adjustedPercent = (percent.sub(separationThresh)).div(threshDelta);
-                        const birdVelocity = velocityStorage.element(i);
-
-                        const cosRange = cos(adjustedPercent.mul(PI_2));
-                        const cosRangeAdjust = float(0.5).sub(cosRange.mul(0.5)).add(0.5);
-                        const velocityAdjust = cosRangeAdjust.mul(deltaTime);
-                        velocity.addAssign(normalize(birdVelocity).mul(velocityAdjust));
-                    }).Else(() => {
-                        const threshDelta = alignmentThresh.oneMinus();
-                        const adjustedPercent = threshDelta.equal(0.0).select(1.0, (percent.sub(alignmentThresh)).div(threshDelta));
-
-                        const cosRange = cos(adjustedPercent.mul(PI_2));
-                        const adj1 = cosRange.mul(- 0.5);
-                        const adj2 = adj1.add(0.5);
-                        const adj3 = float(0.5).sub(adj2);
-
-                        const velocityAdjust = adj3.mul(deltaTime);
-                        velocity.addAssign(normalize(dirToBird).mul(velocityAdjust));
-                    });
-                });
-
-                If(length(velocity).greaterThan(limit), () => {
-                    velocity.assign(normalize(velocity).mul(limit));
-                });
-
-                velocityStorage.element(birdIndex).assign(velocity);
-            })().compute(BIRDS);
-
-            computePosition = Fn(() => {
-                const { deltaTime } = effectController;
-                positionStorage.element(instanceIndex).addAssign(velocityStorage.element(instanceIndex).mul(deltaTime).mul(15.0));
-
-                const velocity = velocityStorage.element(instanceIndex);
-                const phase = phaseStorage.element(instanceIndex);
-
-                const modValue = phase.add(deltaTime).add(length(velocity.xz).mul(deltaTime).mul(3.0)).add(max(velocity.y, 0.0).mul(deltaTime).mul(6.0));
-                phaseStorage.element(instanceIndex).assign(modValue.mod(62.83));
-            })().compute(BIRDS);
-
-            scene.add(birdMesh); // Commented out to see background clearly
-
-            // Event listeners
-            container.style.touchAction = 'none';
-            document.addEventListener('pointermove', onPointerMove);
-            window.addEventListener('resize', onWindowResize);
-
+            createParticleOrb();
+            
             // Initialize scroll animations
             initScrollAnimations();
-        }
-
-        function onWindowResize() {
-            if (!camera || !renderer) return;
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function onPointerMove(event) {
-            if (event.isPrimary === false) return;
-            pointer.x = (event.clientX / window.innerWidth) * 2.0 - 1.0;
-            pointer.y = 1.0 - (event.clientY / window.innerHeight) * 2.0;
-        }
-
-        function animate() {
-            render();
-        }
-
-        function render() {
-            const now = performance.now();
-            let deltaTime = (now - last) / 1000;
-
-            if (deltaTime > 1) deltaTime = 1;
-            last = now;
-
-            // Detect if user is actively scrolling
-            const isScrolling = Math.abs(scrollVelocity) > 0.5 ? 1.0 : 0.0;
-            const normalizedScrollVel = Math.max(-1, Math.min(1, scrollVelocity / 20));
-            const normalizedScrollPos = Math.min(1.0, Math.max(0.0, scrollY / (document.body.scrollHeight - window.innerHeight)));
-
-            // Mouse interaction
-            const combinedPointer = {
-                x: pointer.x,
-                y: pointer.y
-            };
-
-            raycaster.setFromCamera(combinedPointer, camera);
-
-            // Update uniforms
-            effectController.now.value = now;
-            effectController.deltaTime.value = deltaTime;
-            effectController.rayOrigin.value.copy(raycaster.ray.origin);
-            effectController.rayDirection.value.copy(raycaster.ray.direction);
-            effectController.isScrolling.value = isScrolling;
-            effectController.scrollVel.value = normalizedScrollVel;
-            effectController.scrollPos.value = normalizedScrollPos;
-
-            try {
-                renderer.compute(computeVelocity);
-                renderer.compute(computePosition);
-                renderer.render(scene, camera);
-            } catch (error) {
-                console.error('Error during rendering:', error);
-            }
-
-            // Smoothly decay scroll velocity
-            scrollVelocity *= 0.95;
+            
+            // Initialize text hover effect
+            initTextHoverEffect();
+            
+            // Initialize glowing stars
+            initGlowingStars();
         }
 
         // Scroll-based animation
         function initScrollAnimations() {
             const observerOptions = {
-                threshold: 0.1, // Reduced from 0.3 to 0.1 for earlier triggering
-                rootMargin: '0px 0px -50px 0px' // Reduced from -100px to -50px
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
             };
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
+                        
+                        // Handle feature cards with staggered animation
+                        if (entry.target.classList.contains('features-grid')) {
+                            const cards = entry.target.querySelectorAll('.feature-card');
+                            cards.forEach((card, index) => {
+                                setTimeout(() => {
+                                    card.classList.add('visible');
+                                }, index * 150);
+                            });
+                        }
                     } else {
-                        // Remove visible class when element goes out of view
                         entry.target.classList.remove('visible');
+                        
+                        // Remove visible class from feature cards
+                        if (entry.target.classList.contains('features-grid')) {
+                            const cards = entry.target.querySelectorAll('.feature-card');
+                            cards.forEach(card => {
+                                card.classList.remove('visible');
+                            });
+                        }
                     }
                 });
             }, observerOptions);
@@ -1115,18 +1845,25 @@
             // Trigger animation for other elements already in view on page load
             setTimeout(() => {
                 document.querySelectorAll('[data-scroll]').forEach(el => {
-                    // Skip first section as it's already handled above
                     if (el.closest('.first-section')) return;
 
                     const rect = el.getBoundingClientRect();
                     const isInView = rect.top < window.innerHeight && rect.bottom > 0;
                     if (isInView) {
                         el.classList.add('visible');
+                        
+                        // Handle feature cards
+                        if (el.classList.contains('features-grid')) {
+                            const cards = el.querySelectorAll('.feature-card');
+                            cards.forEach((card, index) => {
+                                setTimeout(() => {
+                                    card.classList.add('visible');
+                                }, index * 150);
+                            });
+                        }
                     }
                 });
-            }, 100); // Small delay to ensure page is fully loaded
-
-            // Note: Scroll tracking is now handled by Lenis (see bottom of script)
+            }, 100);
         }
 
         init();
@@ -1135,6 +1872,40 @@
         let lenis;
         let lenisRetryCount = 0;
         const maxRetries = 50;
+
+        // Text Hover Effect Implementation
+        function initTextHoverEffect() {
+            const svg = document.getElementById('hero-text-svg');
+            const revealMask = document.getElementById('revealMask');
+            
+            if (!svg || !revealMask) return;
+
+            let isHovered = false;
+            
+            svg.addEventListener('mouseenter', () => {
+                isHovered = true;
+            });
+            
+            svg.addEventListener('mouseleave', () => {
+                isHovered = false;
+                // Reset mask to center when not hovering
+                revealMask.setAttribute('cx', '50%');
+                revealMask.setAttribute('cy', '50%');
+            });
+            
+            svg.addEventListener('mousemove', (e) => {
+                if (!isHovered) return;
+                
+                const svgRect = svg.getBoundingClientRect();
+                const cxPercentage = ((e.clientX - svgRect.left) / svgRect.width) * 100;
+                const cyPercentage = ((e.clientY - svgRect.top) / svgRect.height) * 100;
+                
+                // Smooth transition using CSS transition on the mask
+                revealMask.style.transition = 'cx 0.1s ease-out, cy 0.1s ease-out';
+                revealMask.setAttribute('cx', `${cxPercentage}%`);
+                revealMask.setAttribute('cy', `${cyPercentage}%`);
+            });
+        }
 
         // Wait for Lenis to be available
         function initializeLenis() {
@@ -1207,12 +1978,162 @@
 
         // Start initialization
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeLenis);
+            document.addEventListener('DOMContentLoaded', () => {
+                initializeLenis();
+                initTextHoverEffect();
+                // Initialize globe after a longer delay to ensure all CDN scripts are loaded
+                setTimeout(initGlobe, 1000);
+            });
         } else {
             initializeLenis();
+            initTextHoverEffect();
+            setTimeout(initGlobe, 1000);
         }
 
-    </script>
-</body>
+        // Initialize glowing stars for cards
+        function initGlowingStars() {
+            const starsCount = 108;
+            const columns = 18;
+            
+            function createStarsGrid(containerId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                // Create stars
+                for (let i = 0; i < starsCount; i++) {
+                    const starContainer = document.createElement('div');
+                    starContainer.className = 'star-container';
+                    
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.dataset.index = i;
+                    
+                    const glow = document.createElement('div');
+                    glow.className = 'star-glow';
+                    
+                    starContainer.appendChild(star);
+                    starContainer.appendChild(glow);
+                    container.appendChild(starContainer);
+                }
+                
+                return container;
+            }
+            
+            function startRandomGlowing(containerId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                const stars = container.querySelectorAll('.star');
+                
+                setInterval(() => {
+                    // Remove previous glowing stars
+                    stars.forEach(star => {
+                        star.classList.remove('glowing');
+                        star.nextElementSibling.style.animationDelay = '0s';
+                    });
+                    
+                    // Select 5 random stars to glow
+                    const glowingIndices = [];
+                    for (let i = 0; i < 5; i++) {
+                        let randomIndex;
+                        do {
+                            randomIndex = Math.floor(Math.random() * starsCount);
+                        } while (glowingIndices.includes(randomIndex));
+                        glowingIndices.push(randomIndex);
+                    }
+                    
+                    // Apply glowing effect
+                    glowingIndices.forEach((index, i) => {
+                        const star = stars[index];
+                        const delay = (index % 10) * 0.1;
+                        
+                        setTimeout(() => {
+                            star.classList.add('glowing');
+                            const glow = star.nextElementSibling;
+                            glow.style.animationDelay = `${delay}s`;
+                        }, i * 100);
+                    });
+                }, 3000);
+            }
+            
+            function setupMouseEffects(cardId, containerId) {
+                const card = document.querySelector(`[data-card-id="${cardId}"]`);
+                const container = document.getElementById(containerId);
+                
+                if (!card || !container) return;
+                
+                const stars = container.querySelectorAll('.star');
+                
+                card.addEventListener('mouseenter', () => {
+                    stars.forEach((star, index) => {
+                        const delay = index * 0.01;
+                        setTimeout(() => {
+                            star.classList.add('mouse-glow');
+                            const glow = star.nextElementSibling;
+                            glow.style.opacity = '1';
+                            glow.style.animationDelay = `${delay}s`;
+                        }, delay * 1000);
+                    });
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    stars.forEach(star => {
+                        star.classList.remove('mouse-glow');
+                        const glow = star.nextElementSibling;
+                        glow.style.opacity = '0';
+                    });
+                });
+            }
+            
+            // Initialize both cards
+            createStarsGrid('stars-researchers');
+            createStarsGrid('stars-public');
+            
+            // Start random glowing animations
+            setTimeout(() => {
+                startRandomGlowing('stars-researchers');
+                startRandomGlowing('stars-public');
+            }, 1000);
+            
+            // Setup mouse hover effects
+            setupMouseEffects('researchers', 'stars-researchers');
+            setupMouseEffects('public', 'stars-public');
+        }
 
-</html>
+        // Setup card click handlers
+        function initCardClickHandlers() {
+            const researchersCard = document.querySelector('[data-card-id="researchers"]');
+            const publicCard = document.querySelector('[data-card-id="public"]');
+            
+            if (researchersCard) {
+                researchersCard.addEventListener('click', () => {
+                    window.location.href = "{% url 'researchers' %}";
+                });
+                // Add cursor pointer to indicate clickability
+                researchersCard.style.cursor = 'pointer';
+            }
+            
+            if (publicCard) {
+                publicCard.addEventListener('click', () => {
+                    window.location.href = "{% url 'learn_more' %}";
+                });
+                // Add cursor pointer to indicate clickability
+                publicCard.style.cursor = 'pointer';
+            }
+        }
+
+        // Initialize glowing stars
+        initGlowingStars();
+        
+        // Initialize card click handlers
+        initCardClickHandlers();
+
+    </script>
+
+    <!-- Three.js and Globe Dependencies from CDN -->
+    <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three-globe@2.31.1/dist/three-globe.min.js"></script>
+    <script src="{% static 'core/js/globe.js' %}"></script>
+
+{% endblock %}

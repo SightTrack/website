@@ -24,6 +24,9 @@ def learn_more(request):
 def about_us(request):
     return render(request, "core/about_us.html", {})
 
+def researchers(request):
+    return render(request, "core/researchers.html", {})
+
 def legal(request):
     return render(request, "core/legal.html", {})
 
@@ -190,3 +193,7 @@ Security Info:
         form = ContactForm()
     
     return render(request, "core/contact.html", {'form': form})
+
+
+def articles(request):
+    return render(request, "core/articles.html", {})
