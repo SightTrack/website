@@ -7,6 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <link rel="icon" href="{% static 'images/favicon.png' %}">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
     html {
         background: #000000;
@@ -365,6 +366,13 @@
         flex-shrink: 0;
     }
 
+    .contact-icon svg {
+        width: 24px;
+        height: 24px;
+        color: white;
+        stroke-width: 1.5;
+    }
+
     .contact-icon img {
         width: 30px;
         height: 30px;
@@ -468,6 +476,11 @@
             height: 40px;
             margin-right: 1rem;
             font-size: 1.2rem;
+        }
+
+        .contact-icon svg {
+            width: 20px;
+            height: 20px;
         }
 
         .office-hours {
@@ -579,7 +592,9 @@
             <h2 class="section-title">Get in Touch</h2>
 
             <div class="contact-method">
-                <div class="contact-icon">📧</div>
+                <div class="contact-icon">
+                    <i data-lucide="mail"></i>
+                </div>
                 <div class="contact-details">
                     <h3>Email</h3>
                     <p><a href="mailto:contact@sighttrack.org">contact@sighttrack.org</a></p>
@@ -587,7 +602,9 @@
             </div>
 
             <div class="contact-method">
-                <div class="contact-icon">📍</div>
+                <div class="contact-icon">
+                    <i data-lucide="map-pin"></i>
+                </div>
                 <div class="contact-details">
                     <h3>Address</h3>
                     <p>Toronto, ON, Canada</p>
@@ -596,7 +613,7 @@
 
             <div class="contact-method">
                 <div class="contact-icon">
-                    <img src="{% static 'images/instagram.png' %}" alt="Instagram">
+                    <i data-lucide="instagram"></i>
                 </div>
                 <div class="contact-details">
                     <h3>Instagram</h3>
@@ -619,7 +636,7 @@
     <div class="office-info">
         <h2 class="section-title">Office Hours</h2>
         <p style="color: #cccccc; margin-bottom: 1.5rem; font-weight: 300;">Our team is available during the
-            following hours (Pacific Time):</p>
+            following hours (Eastern Standard Time):</p>
 
         <div class="office-hours">
             <div class="hours-item">
@@ -708,5 +725,8 @@
             counter.style.color = remaining < 100 ? '#ef4444' : '#888';
         });
     });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
 </script>
 {% endblock %}
