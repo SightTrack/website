@@ -103,9 +103,10 @@
 
     .team-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 2rem;
         margin: 3rem 0 1rem;
+        padding: 0 10rem;
     }
 
     .leader-section {
@@ -190,6 +191,61 @@
 
     .member-info {
         flex: 1;
+    }
+
+    /* Animation styles */
+    .hero-section {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .leader-section {
+        animation: fadeInScale 1s ease-out 0.3s both;
+    }
+
+    .team-member {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .team-member:nth-child(1) { animation-delay: 1.2s; }
+    .team-member:nth-child(2) { animation-delay: 1.4s; }
+    .team-member:nth-child(3) { animation-delay: 1.6s; }
+    .team-member:nth-child(4) { animation-delay: 1.8s; }
+    .team-member:nth-child(5) { animation-delay: 2.0s; }
+    .team-member:nth-child(6) { animation-delay: 2.2s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+        .hero-section,
+        .leader-section,
+        .team-member {
+            animation: none;
+            opacity: 1;
+            transform: none;
+        }
     }
 
     .member-name {
