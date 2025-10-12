@@ -7,6 +7,13 @@ import { useState } from "react";
 export default function Navbar() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+	const preloadMapComponent = () => {
+		// Preload the map component when user hovers over map link
+		import("./WorldMap").catch(() => {
+			// Silently fail if component doesn't exist or can't be loaded
+		});
+	};
+
 	return (
 		<nav className="font-mono shadow-lg">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full mt-2">
@@ -37,6 +44,7 @@ export default function Navbar() {
 							<Link
 								href="/map"
 								className="text-gray-100 hover:text-gray-300 px-3 py-2 rounded-md"
+								onMouseEnter={preloadMapComponent}
 							>
 								Map
 							</Link>
@@ -116,6 +124,7 @@ export default function Navbar() {
 						<Link
 							href="/map"
 							className="block text-gray-100 hover:text-gray-300 px-3 py-2 rounded-md"
+							onMouseEnter={preloadMapComponent}
 						>
 							Map
 						</Link>

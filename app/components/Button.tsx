@@ -2,17 +2,17 @@
 import React, { ButtonHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface TailwindButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	children: React.ReactNode;
 	showIcon?: boolean;
 }
 
-export const TailwindButton = ({
+export const Button = ({
 	children,
 	className,
 	showIcon = true,
 	...props
-}: TailwindButtonProps) => {
+}: ButtonProps) => {
 	return (
 		<button
 			className={twMerge(

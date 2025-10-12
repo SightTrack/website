@@ -1,9 +1,11 @@
 "use client";
 
 import { FlipWords } from "./components/FlipText";
-import { TailwindButton } from "./components/TailwindButton";
+import { Button } from "./components/Button";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+	const router = useRouter();
 	const words = [
 		"innovative",
 		"precise",
@@ -11,11 +13,6 @@ export default function Home() {
 		"reliable",
 		"collaborative",
 	];
-
-	const handleButtonClick = () => {
-		// You can customize this function based on your needs
-		console.log("Button clicked!");
-	};
 
 	const handleVideoError = (
 		e: React.SyntheticEvent<HTMLVideoElement, Event>,
@@ -80,9 +77,7 @@ export default function Home() {
 					</div>
 				</div>
 				<div className="flex justify-center text-center animate-fade-in">
-					<TailwindButton onClick={handleButtonClick}>
-						Learn More
-					</TailwindButton>
+					<Button onClick={() => router.push("/about")}>Learn More</Button>
 				</div>
 			</div>
 			{/* Video credit */}
