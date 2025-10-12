@@ -103,11 +103,12 @@ export default function DataUsagePolicyPage() {
 
 								<motion.div variants={staggerItem}>
 									<p className="mb-6">
-										SightTrack ("we," "our," or "the platform") is committed to
-										promoting open, responsible biodiversity science while
-										respecting the rights and contributions of our users. This
-										Data Usage & Attribution Policy explains how data submitted
-										by users is handled, shared, and licensed.
+										SightTrack (&quot;we,&quot; &quot;our,&quot; or &quot;the
+										platform&quot;) is committed to promoting open, responsible
+										biodiversity science while respecting the rights and
+										contributions of our users. This Data Usage &amp;
+										Attribution Policy explains how data submitted by users is
+										handled, shared, and licensed.
 									</p>
 								</motion.div>
 
@@ -117,7 +118,7 @@ export default function DataUsagePolicyPage() {
 									</h2>
 									<p className="mb-4">
 										Users of SightTrack may contribute ecological observations
-										("Sightings"), which may include:
+										(&quot;Sightings&quot;), which may include:
 									</p>
 									<ul className="list-disc pl-6 mb-6 space-y-2">
 										<li>Photographs of species or habitats</li>
@@ -261,8 +262,9 @@ export default function DataUsagePolicyPage() {
 
 									<div className="bg-black border border-gray-600 rounded-lg p-6 mb-6">
 										<p className="text-gray-300 italic">
-											"Species observation data contributed by users of
-											SightTrack (sighttrack.org), licensed under CC BY 4.0."
+											&quot;Species observation data contributed by users of
+											SightTrack (sighttrack.org), licensed under CC BY
+											4.0.&quot;
 										</p>
 									</div>
 								</motion.section>

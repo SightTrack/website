@@ -32,8 +32,8 @@ export default function MapPage() {
 
 			// Convert to simple points for pulsing dots
 			const points = pts.map((s) => ({
-				lat: s.latitude,
-				lng: s.longitude,
+				lat: s.latitude as number,
+				lng: s.longitude as number,
 			}));
 
 			setDots(points);

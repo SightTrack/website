@@ -100,10 +100,11 @@ export default function CookiePolicyPage() {
 
 								<div>
 									<p className="mb-6">
-										SightTrack ("we," "us," or "our") is committed to protecting
-										your privacy and ensuring transparency in how we use cookies
-										and similar technologies on our website sighttrack.org and
-										related services.
+										SightTrack (&quot;we,&quot; &quot;us,&quot; or
+										&quot;our&quot;) is committed to protecting your privacy and
+										ensuring transparency in how we use cookies and similar
+										technologies on our website sighttrack.org and related
+										services.
 									</p>
 									<p className="mb-6">
 										This Cookie Policy explains what cookies are, how and why we
@@ -231,8 +232,8 @@ export default function CookiePolicyPage() {
 										SightTrack uses Mapbox for interactive mapping. While Mapbox
 										does not set tracking cookies directly through our
 										application, their services may involve the use of browser
-										storage for rendering map features. You can read Mapbox's
-										privacy practices here:
+										storage for rendering map features. You can read
+										Mapbox&apos;s privacy practices here:
 									</p>
 									<p className="mb-4">
 										<a
@@ -333,8 +334,9 @@ export default function CookiePolicyPage() {
 									<p className="mb-6">
 										We may update this Cookie Policy periodically to reflect
 										changes in our technologies or legal requirements. When we
-										do, we will revise the "Effective Date" at the top of the
-										policy and may notify users if significant changes are made.
+										do, we will revise the &quot;Effective Date&quot; at the top
+										of the policy and may notify users if significant changes
+										are made.
 									</p>
 								</motion.section>
 

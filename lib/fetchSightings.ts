@@ -1,7 +1,14 @@
 // lib/fetchSightings.js
 
+interface Sighting {
+	[key: string]: unknown;
+}
+
 // Fetch a single "page" of sightings
-export async function fetchSightings({ limit = 50, nextToken } = {}) {
+export async function fetchSightings({
+	limit = 50,
+	nextToken,
+}: { limit?: number; nextToken?: string } = {}) {
 	// Add nextToken to query params if provided
 	const url = new URL(
 		"https://j9zxawncta.execute-api.us-east-1.amazonaws.com/dev/sightings",
@@ -20,8 +27,8 @@ export async function fetchSightings({ limit = 50, nextToken } = {}) {
 
 // Fetch *all* sightings by iterating through all pages
 export async function fetchAllSightings() {
-	let allSightings = [];
-	let nextToken = undefined;
+	let allSightings: Sighting[] = [];
+	let nextToken: string | undefined = undefined;
 
 	do {
 		const data = await fetchSightings({ limit: 100, nextToken });

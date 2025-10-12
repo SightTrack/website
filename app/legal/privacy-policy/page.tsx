@@ -16,14 +16,6 @@ export default function PrivacyPolicyPage() {
 	const pathname = usePathname();
 
 	// Animation variants
-	const fadeInUp = {
-		hidden: { opacity: 0, y: 60 },
-		visible: {
-			opacity: 1,
-			y: 0,
-			transition: { duration: 0.6 },
-		},
-	};
 
 	const fadeInLeft = {
 		hidden: { opacity: 0, x: -60 },
@@ -82,7 +74,7 @@ export default function PrivacyPolicyPage() {
 							transition={{ type: "spring", stiffness: 300 }}
 						>
 							<motion.nav className="space-y-2" variants={staggerContainer}>
-								{legalPages.map((page, index) => (
+								{legalPages.map((page) => (
 									<motion.div key={page.href} variants={staggerItem}>
 										<Link
 											href={page.href}
@@ -127,10 +119,10 @@ export default function PrivacyPolicyPage() {
 								<motion.div variants={staggerItem}>
 									<p className="mb-6">
 										This privacy policy applies to the SightTrack app (hereby
-										referred to as "Application") for mobile devices that was
-										created by SightTrack (hereby referred to as "Service
-										Provider") as a Free service. This service is intended for
-										use "AS IS".
+										referred to as &quot;Application&quot;) for mobile devices
+										that was created by SightTrack (hereby referred to as
+										&quot;Service Provider&quot;) as a Free service. This
+										service is intended for use &quot;AS IS&quot;.
 									</p>
 								</motion.div>
 
@@ -144,7 +136,8 @@ export default function PrivacyPolicyPage() {
 									</p>
 									<ul className="list-disc pl-6 mb-6 space-y-2">
 										<li>
-											Your device's Internet Protocol address (e.g. IP address)
+											Your device&apos;s Internet Protocol address (e.g. IP
+											address)
 										</li>
 										<li>
 											The pages of the Application that you visit, the time and
@@ -230,10 +223,10 @@ export default function PrivacyPolicyPage() {
 									<p className="mb-6">
 										The Service Provider will retain User Provided data for as
 										long as you use the Application and for a reasonable time
-										thereafter. If you'd like them to delete User Provided Data
-										that you have provided via the Application, please contact
-										them at contact@sighttrack.com and they will respond in a
-										reasonable time.
+										thereafter. If you&apos;d like them to delete User Provided
+										Data that you have provided via the Application, please
+										contact them at contact@sighttrack.com and they will respond
+										in a reasonable time.
 									</p>
 								</motion.section>
 
@@ -253,10 +246,11 @@ export default function PrivacyPolicyPage() {
 										encourages all children to never submit any personally
 										identifiable information through the Application and/or
 										Services. The Service Provider encourage parents and legal
-										guardians to monitor their children's Internet usage and to
-										help enforce this Policy by instructing their children never
-										to provide personally identifiable information through the
-										Application and/or Services without their permission.
+										guardians to monitor their children&apos;s Internet usage
+										and to help enforce this Policy by instructing their
+										children never to provide personally identifiable
+										information through the Application and/or Services without
+										their permission.
 									</p>
 
 									<p className="mb-6">

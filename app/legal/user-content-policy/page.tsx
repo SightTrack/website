@@ -103,12 +103,12 @@ export default function UserContentPolicyPage() {
 
 								<motion.div variants={staggerItem}>
 									<p className="mb-6">
-										SightTrack ("we," "our," or "the platform") is dedicated to
-										fostering a respectful, science-driven community where users
-										can document and share observations of biodiversity. This
-										policy outlines the rules and expectations regarding content
-										uploaded by users, including how it is moderated, used, and
-										protected.
+										SightTrack (&quot;we,&quot; &quot;our,&quot; or &quot;the
+										platform&quot;) is dedicated to fostering a respectful,
+										science-driven community where users can document and share
+										observations of biodiversity. This policy outlines the rules
+										and expectations regarding content uploaded by users,
+										including how it is moderated, used, and protected.
 									</p>
 									<p className="mb-6">
 										By contributing content to SightTrack, you agree to abide by
