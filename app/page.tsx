@@ -3,9 +3,11 @@
 import { FlipWords } from "./components/FlipText";
 import { Button } from "./components/Button";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function Home() {
 	const router = useRouter();
+	const [videoLoaded, setVideoLoaded] = useState(false);
 	const words = [
 		"innovative",
 		"precise",
@@ -14,52 +16,46 @@ export default function Home() {
 		"collaborative",
 	];
 
-	const handleVideoError = (
-		e: React.SyntheticEvent<HTMLVideoElement, Event>,
-	) => {
-		const video = e.target as HTMLVideoElement;
-		console.error("Video playback error:", video.error);
-		// Try to recover by reloading the video
-		video.load();
-		video.play().catch(console.error);
-	};
+	// Delay video loading for better initial page load
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setVideoLoaded(true);
+		}, 500);
+		return () => clearTimeout(timer);
+	}, []);
 
 	return (
 		<div className="relative min-h-screen w-full overflow-hidden font-mono">
-			{/* Video container with darkening overlay and vignette */}
+			{/* Background with single overlay */}
 			<div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-				<video
-					autoPlay
-					loop
-					muted
-					playsInline
-					webkit-playsinline="true"
-					x5-playsinline="true"
-					preload="none"
-					className="absolute top-0 left-0 w-full h-full object-cover [image-rendering:crisp-edges] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] brightness-[0.7] md:scale-100 scale-[1.5] md:block hidden"
-				>
-					<source src="/videos/footage.mp4" type="video/mp4" />
-					Your browser does not support the video tag.
-				</video>
-				<video
-					autoPlay
-					loop
-					muted
-					playsInline
-					webkit-playsinline="true"
-					x5-playsinline="true"
-					preload="none"
-					onError={handleVideoError}
-					className="absolute top-0 left-0 w-full h-full object-cover [image-rendering:crisp-edges] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] brightness-[0.7] md:hidden block"
-				>
-					<source src="/videos/footage-mobile.mp4" type="video/mp4" />
-					<source src="/videos/footage-mobile.webm" type="video/webm" />
-					Your browser does not support the video tag.
-				</video>
-				{/* Dark overlay */}
-				<div className="absolute inset-0 bg-black/30"></div>
-				{/* Vignette effect */}
-				<div className="absolute inset-0 bg-[radial-gradient(circle,transparent_25%,rgba(0,0,0,0.6)_80%,rgba(0,0,0,0.8)_100%)]"></div>
+				{videoLoaded && (
+					<>
+						{/* Desktop video */}
+						<video
+							autoPlay
+							loop
+							muted
+							playsInline
+							preload="metadata"
+							className="absolute top-0 left-0 w-full h-full object-cover brightness-[0.7] md:block hidden will-change-auto"
+						>
+							<source src="/videos/footage.mp4" type="video/mp4" />
+						</video>
+						{/* Mobile video */}
+						<video
+							autoPlay
+							loop
+							muted
+							playsInline
+							preload="metadata"
+							className="absolute top-0 left-0 w-full h-full object-cover brightness-[0.7] md:hidden block will-change-auto"
+						>
+							<source src="/videos/footage-mobile.mp4" type="video/mp4" />
+						</video>
+					</>
+				)}
+				{/* Simplified overlay */}
+				<div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_15%,rgba(0,0,0,0.5)_100%)]"></div>
 			</div>
 			<div className="relative z-10">
 				<div className="min-h-[40rem] flex justify-center items-center px-4 py-8 md:py-0">
@@ -70,7 +66,7 @@ export default function Home() {
 						<div className="text-lg md:text-xl font-light text-neutral-200 text-center tracking-wide animate-fade-in px-4">
 							Delivering{" "}
 							<span className="font-medium">
-								<FlipWords words={words} />
+								<FlipWords words={words} duration={3000} />
 							</span>{" "}
 							sustainabilty solutions
 						</div>
