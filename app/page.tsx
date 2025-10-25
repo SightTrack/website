@@ -20,7 +20,7 @@ export default function Home() {
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setVideoLoaded(true);
-		}, 500);
+		}, 100);
 		return () => clearTimeout(timer);
 	}, []);
 
@@ -36,10 +36,12 @@ export default function Home() {
 							loop
 							muted
 							playsInline
-							preload="metadata"
+							preload="none"
+							poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='%23111827' width='1' height='1'/%3E%3C/svg%3E"
 							className="absolute top-0 left-0 w-full h-full object-cover brightness-[0.7] md:block hidden will-change-auto"
 						>
-							<source src="/videos/footage.mp4" type="video/mp4" />
+							<source src="/videos/footage-optimized.webm" type="video/webm" />
+							<source src="/videos/footage-optimized.mp4" type="video/mp4" />
 						</video>
 						{/* Mobile video */}
 						<video
@@ -47,9 +49,11 @@ export default function Home() {
 							loop
 							muted
 							playsInline
-							preload="metadata"
+							preload="none"
+							poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='%23111827' width='1' height='1'/%3E%3C/svg%3E"
 							className="absolute top-0 left-0 w-full h-full object-cover brightness-[0.7] md:hidden block will-change-auto"
 						>
+							<source src="/videos/footage-mobile.webm" type="video/webm" />
 							<source src="/videos/footage-mobile.mp4" type="video/mp4" />
 						</video>
 					</>
