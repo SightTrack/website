@@ -539,9 +539,9 @@ export default function AboutPage() {
 						</motion.div>
 					</motion.div>
 
-					{/* Team Members Grid */}
+					{/* Team Members Grid - 2 rows of 3 */}
 					<motion.div
-						className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8"
+						className="grid grid-cols-3 gap-6 md:gap-8 mt-12"
 						variants={staggerContainer}
 					>
 						<motion.div
@@ -564,9 +564,7 @@ export default function AboutPage() {
 								/>
 							</motion.div>
 							<div className="text-center">
-								<h3 className="text-base font-semibold text-white">
-									Alina Sun
-								</h3>
+								<h3 className="text-base font-semibold text-white">Alina Sun</h3>
 								<p className="text-neutral-400 mt-1 text-sm">UI Design</p>
 							</div>
 						</motion.div>
@@ -591,9 +589,7 @@ export default function AboutPage() {
 								/>
 							</motion.div>
 							<div className="text-center">
-								<h3 className="text-base font-semibold text-white">
-									Andrew Ma
-								</h3>
+								<h3 className="text-base font-semibold text-white">Andrew Ma</h3>
 								<p className="text-neutral-400 mt-1 text-sm">UI Design</p>
 							</div>
 						</motion.div>
@@ -618,9 +614,7 @@ export default function AboutPage() {
 								/>
 							</motion.div>
 							<div className="text-center">
-								<h3 className="text-base font-semibold text-white">
-									David Liu
-								</h3>
+								<h3 className="text-base font-semibold text-white">David Liu</h3>
 								<p className="text-neutral-400 mt-1 text-sm">UI Design</p>
 							</div>
 						</motion.div>
@@ -646,9 +640,7 @@ export default function AboutPage() {
 							</motion.div>
 							<div className="text-center">
 								<h3 className="text-base font-semibold text-white">Emma Bi</h3>
-								<p className="text-neutral-400 mt-1 text-sm">
-									UI Design, Marketing
-								</p>
+								<p className="text-neutral-400 mt-1 text-sm">UI Design, Marketing</p>
 							</div>
 						</motion.div>
 
@@ -674,6 +666,34 @@ export default function AboutPage() {
 							<div className="text-center">
 								<h3 className="text-base font-semibold text-white">Mike Li</h3>
 								<p className="text-neutral-400 mt-1 text-sm">Developer</p>
+							</div>
+						</motion.div>
+
+						<motion.div
+							className="flex flex-col items-center space-y-3"
+							variants={staggerItem}
+							whileHover={{ y: -8 }}
+							transition={{ type: "spring", stiffness: 300 }}
+						>
+							<motion.div
+								className="relative"
+								whileHover={{ scale: 1.05 }}
+								transition={{ type: "spring", stiffness: 300 }}
+							>
+								<div className="w-[120px] h-[120px] rounded-full overflow-hidden border-2 border-gray-600/50 shadow-lg hover:border-gray-500/70 transition-all duration-300">
+									<Image
+										src="/portraits/daniel.png"
+										alt="Daniel"
+										width={120}
+										height={120}
+										className="w-full h-full object-cover"
+										style={{ objectPosition: "center 20%" }}
+									/>
+								</div>
+							</motion.div>
+							<div className="text-center">
+								<h3 className="text-base font-semibold text-white">Daniel Zhao</h3>
+								<p className="text-neutral-400 mt-1 text-sm">Founding Advisor</p>
 							</div>
 						</motion.div>
 					</motion.div>
